@@ -10,10 +10,27 @@ export const taskApi = {
    * Get tasks for a project
    */
   getByProject: async (projectId: string): Promise<Task[]> => {
-    const response = await apiClient.get<{ tasks: Task[] }>(
-      `/projects/${projectId}/tasks`
-    );
-    return response.data.tasks;
+    const response = await apiClient.get(`/projects/${projectId}/tasks`);
+    
+    console.log('API Response for getByProject Tasks:', response.data);
+    
+    // ✅ Handle paginated response with 'items'
+    if (response.data && Array.isArray(response.data.items)) {
+      return response.data.items;
+    }
+    
+    // Handle legacy format with 'tasks'
+    if (response.data && Array.isArray(response.data.tasks)) {
+      return response.data.tasks;
+    }
+    
+    // Handle direct array
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    
+    console.warn('Unexpected API response format:', response.data);
+    return [];
   },
 
   /**
@@ -54,14 +71,14 @@ export const taskApi = {
    * Claim a department task
    */
   claim: async (taskId: string): Promise<void> => {
-    await apiClient.post(`/tasks/${taskId}/claim`);
+    await apiClient.post(`/tasks/${taskId}/claim`, {});  // ✅ Send empty object
   },
 
   /**
    * Start task
    */
   start: async (taskId: string): Promise<void> => {
-    await apiClient.post(`/tasks/${taskId}/start`);
+    await apiClient.post(`/tasks/${taskId}/start`, {});  // ✅ Send empty object
   },
 
   /**
@@ -82,13 +99,13 @@ export const taskApi = {
    * Unblock task
    */
   unblock: async (taskId: string): Promise<void> => {
-    await apiClient.post(`/tasks/${taskId}/unblock`);
+    await apiClient.post(`/tasks/${taskId}/unblock`, {});  // ✅ Send empty object
   },
 
   /**
    * Complete task
    */
   complete: async (taskId: string): Promise<void> => {
-    await apiClient.post(`/tasks/${taskId}/complete`);
+    await apiClient.post(`/tasks/${taskId}/complete`, {});  // ✅ Send empty object
   },
 };

@@ -10,8 +10,27 @@ export const projectApi = {
    * Get all projects
    */
   getAll: async (): Promise<Project[]> => {
-    const response = await apiClient.get<{ projects: Project[] }>('/projects');
-    return response.data.projects;
+    const response = await apiClient.get('/projects');
+    
+    console.log('API Response for getAll Projects:', response.data);
+    
+    // ✅ Handle paginated response with 'items'
+    if (response.data && Array.isArray(response.data.items)) {
+      return response.data.items;
+    }
+    
+    // Handle legacy format with 'projects'
+    if (response.data && Array.isArray(response.data.projects)) {
+      return response.data.projects;
+    }
+    
+    // Handle direct array
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    
+    console.warn('Unexpected API response format:', response.data);
+    return [];
   },
 
   /**
@@ -26,14 +45,14 @@ export const projectApi = {
    * Start project
    */
   start: async (id: string): Promise<void> => {
-    await apiClient.post(`/projects/${id}/start`);
+    await apiClient.post(`/projects/${id}/start`, {});  // ✅ Send empty object
   },
 
   /**
    * Complete project
    */
   complete: async (id: string): Promise<void> => {
-    await apiClient.post(`/projects/${id}/complete`);
+    await apiClient.post(`/projects/${id}/complete`, {});  // ✅ Send empty object
   },
 
   /**

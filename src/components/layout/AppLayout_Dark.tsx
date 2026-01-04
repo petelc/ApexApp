@@ -32,12 +32,9 @@ import {
   Settings,
   AccountCircle,
   ChevronLeft,
-  LightMode,
-  DarkMode,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useThemeMode } from '@/contexts/ThemeContext';
 
 const DRAWER_WIDTH = 260;
 
@@ -54,7 +51,6 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { mode, toggleTheme } = useThemeMode();
 
   const handleDrawerToggle = () => {
     if (isMobile) {
@@ -95,15 +91,21 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         }}
       >
         <Box
-          component="img"
-          src="/apex-logo.svg"
-          alt="APEX Logo"
           sx={{
             width: 40,
             height: 40,
             borderRadius: 2,
+            background: 'linear-gradient(135deg, #4A90E2 0%, #2E5090 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 900,
+            fontSize: '1.25rem',
+            color: 'white',
           }}
-        />
+        >
+          <img src="/apex_icon.svg" alt="APEX" style={{ width: '100%', height: '100%' }} />
+        </Box>
         {(sidebarOpen || isMobile) && (
           <Typography variant="h5" fontWeight={900} color="primary">
             APEX
@@ -269,15 +271,6 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           <Box sx={{ flexGrow: 1 }} />
 
           {/* Right Icons */}
-          <IconButton
-            color="inherit"
-            onClick={toggleTheme}
-            sx={{ mr: 1 }}
-            title={`Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`}
-          >
-            {mode === 'dark' ? <LightMode /> : <DarkMode />}
-          </IconButton>
-
           <IconButton color="inherit" sx={{ mr: 1 }}>
             <Badge badgeContent={3} color="error">
               <Notifications />

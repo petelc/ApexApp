@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import {
   Box,
   Typography,
-  Grid,
+  Grid2 as Grid,
   Card,
   CardContent,
   Button,
@@ -16,19 +16,23 @@ import {
   MenuItem,
   CircularProgress,
   Alert,
+  Divider
 } from '@mui/material';
-import { Add, PlayArrow, CheckCircle, Block } from '@mui/icons-material';
+import { Add, PlayArrow, CheckCircle, Block, DetailsRounded } from '@mui/icons-material';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { taskApi } from '@/api/tasks';
 import { getErrorMessage } from '@/api/client';
-import type { Task, CreateTaskRequest } from '@/types/project';
+import type { Task, CreateTaskRequest, UpdateTaskRequest } from '@/types/project';
+import { SideDrawer } from '@/components/common/SideDrawer';
 
 export default function TasksPage() {
   const { id: projectId } = useParams<{ id: string }>();
   const [tasks, setTasks] = useState<Task[]>([]);
+  // const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
   
   // Create Dialog
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -37,6 +41,13 @@ export default function TasksPage() {
     title: '',
     description: '',
     priority: 'Medium',
+  });
+  const [taskData, setTaskData] = useState<UpdateTaskRequest>({
+    title: '',
+    description: '',
+    status: 'NotStarted',
+    priority: 'Medium',
+
   });
 
   useEffect(() => {
@@ -55,6 +66,15 @@ export default function TasksPage() {
       setError(getErrorMessage(err));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadTask = async (taskId: string) => {
+    try {
+      const data = await taskApi.getById(taskId);
+      setTaskData(data);
+    } catch (err) {
+      setError(getErrorMessage(err));
     }
   };
 
@@ -89,6 +109,11 @@ export default function TasksPage() {
     } catch (err) {
       setError(getErrorMessage(err));
     }
+  };
+
+  const handleDetails = (taskId: string) => {
+    setSideDrawerOpen(true);
+    loadTask(taskId);
   };
 
   const groupedTasks = {
@@ -140,7 +165,7 @@ export default function TasksPage() {
       {/* Kanban Board */}
       <Grid container spacing={2}>
         {/* Not Started */}
-        <Grid item xs={12} md={3}>
+        <Grid  size={{ xs: 12, md: 3 }}>
           <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
             <Typography variant="subtitle2" fontWeight={600} mb={2}>
               Not Started ({groupedTasks.notStarted.length})
@@ -157,14 +182,33 @@ export default function TasksPage() {
                   <Box mt={1}>
                     <Chip label={task.priority} size="small" />
                   </Box>
-                  <Button
-                    size="small"
-                    startIcon={<PlayArrow />}
-                    onClick={() => handleStart(task.id)}
-                    sx={{ mt: 1 }}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center', // Optional: Aligns items vertically in the center
+                      width: '100%', // Optional: Ensures the box takes full width to show spacing effect
+                      border: 'none', // Optional: for visualization
+                      padding: '10px'
+                    }}
                   >
-                    Start
-                  </Button>
+                    <Button
+                        size="small"
+                        startIcon={<PlayArrow />}
+                        onClick={() => handleStart(task.id)}
+                        sx={{ mt: 1 }}
+                      >
+                        Start
+                      </Button>
+                      <Button
+                        size="small"
+                        startIcon={<DetailsRounded />}
+                        onClick={() => handleDetails(task.id)}
+                        sx={{ mt: 1, ml: 1 }}
+                      >
+                      Details
+                      </Button>
+                    </Box>
                 </CardContent>
               </Card>
             ))}
@@ -172,7 +216,7 @@ export default function TasksPage() {
         </Grid>
 
         {/* In Progress */}
-        <Grid item xs={12} md={3}>
+        <Grid  size={{ xs: 12, md: 3 }}>
           <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
             <Typography variant="subtitle2" fontWeight={600} mb={2}>
               In Progress ({groupedTasks.inProgress.length})
@@ -206,7 +250,7 @@ export default function TasksPage() {
         </Grid>
 
         {/* Blocked */}
-        <Grid item xs={12} md={3}>
+        <Grid  size={{ xs: 12, md: 3 }}>
           <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
             <Typography variant="subtitle2" fontWeight={600} mb={2}>
               Blocked ({groupedTasks.blocked.length})
@@ -227,7 +271,7 @@ export default function TasksPage() {
         </Grid>
 
         {/* Completed */}
-        <Grid item xs={12} md={3}>
+        <Grid  size={{ xs: 12, md: 3 }}>
           <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
             <Typography variant="subtitle2" fontWeight={600} mb={2}>
               Completed ({groupedTasks.completed.length})
@@ -247,6 +291,100 @@ export default function TasksPage() {
           </Box>
         </Grid>
       </Grid>
+        
+        <SideDrawer open={sideDrawerOpen} onClose={() => setSideDrawerOpen(false)}>
+          <Box>
+            <Typography variant="h4" fontWeight={600} gutterBottom>
+              Task Details
+            </Typography>
+            <Divider sx={{ mb: 2, mt: 2 }} />
+            <Typography variant="body1">
+              Detailed information about the task will be displayed here.
+            </Typography>
+            <Grid container spacing={2} sx={{ mt: 2 }}>
+              <Grid size={{ xs: 12 }}>
+                <Typography variant="subtitle2" fontWeight={600}>
+                  Task Title
+                </Typography>
+                <TextField
+                  label="Title"
+                  fullWidth
+                  required
+                  value={taskData.title || ''}
+                  onChange={(e) => setTaskData({ ...taskData, title: e.target.value })}
+                  sx={{ mt: 2, mb: 2 }}
+                />
+              </Grid>
+              <Grid size={ { xs: 4 }}>
+                <Typography variant="subtitle2" fontWeight={600}>
+                  Priority
+                </Typography>
+                <TextField
+                  label="Priority"
+                  select
+                  fullWidth
+                  value={taskData.priority}
+                  onChange={(e) => setTaskData({ ...taskData, priority: e.target.value })}
+                  sx={{ mt: 2, mb: 2 }}
+                >
+                  <MenuItem value="Low">Low</MenuItem>
+                  <MenuItem value="Medium">Medium</MenuItem>
+                  <MenuItem value="High">High</MenuItem>
+                  <MenuItem value="Urgent">Urgent</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid size={{ xs: 4 }}>
+                <Typography variant="subtitle2" fontWeight={600}>
+                  Status
+                </Typography>
+                <TextField
+                  label="Status"
+                  select
+                  fullWidth
+                  required
+                  value={taskData.status}
+                  onChange={(e) => setTaskData({ ...taskData, status: e.target.value })}
+                  sx={{ mt: 2, mb: 2 }}
+                >
+                  <MenuItem value="NotStarted">Not Started</MenuItem>
+                  <MenuItem value="InProgress">In Progress</MenuItem>
+                  <MenuItem value="Blocked">Blocked</MenuItem>
+                  <MenuItem value="Completed">Completed</MenuItem>
+                  <MenuItem value="Cancelled">Cancelled</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid size={{ xs: 4 }}>
+                <Typography variant="subtitle2" fontWeight={600}>
+                  Created Date
+                </Typography>
+                <TextField
+                  label="Created Date"
+                  type="date"
+                  fullWidth
+                  value={taskData.createdDate || ''}
+                  onChange={(e) => setTaskData({ ...taskData, createdDate: e.target.value })}
+                  sx={{ mt: 2, mb: 2 }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <Typography variant="subtitle2" fontWeight={600}>
+                  Description
+                </Typography>
+                <TextField
+                  label="Description"
+                  fullWidth
+                  required
+                  multiline
+                  rows={5}
+                  value={taskData.description}
+                  onChange={(e) => setTaskData({ ...taskData, description: e.target.value })}
+                  sx={{ mt: 2, mb: 2 }}
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        </SideDrawer>
+
 
       {/* Create Task Dialog */}
       <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="sm" fullWidth>

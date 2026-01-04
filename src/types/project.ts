@@ -70,6 +70,21 @@ export interface CreateTaskRequest {
   dueDate?: string;
 }
 
+export interface UpdateTaskRequest {
+  title?: string;
+  description?: string;
+  status?: string;
+  priority?: string;
+  assignedToUserId?: string;
+  assignedToDepartmentId?: string;
+  estimatedHours?: number;
+  createdDate?: string;
+  startedDate?: string;
+  completedDate?: string;
+  dueDate?: string;
+  blockedReason?: string;
+}
+
 /**
  * Department Types
  */

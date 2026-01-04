@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
-import { apexTheme } from '@/theme/apexTheme';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
@@ -14,8 +13,7 @@ import NotFoundPage from '@/pages/NotFound';
 
 function App() {
   return (
-    <ThemeProvider theme={apexTheme}>
-      <CssBaseline />
+    <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
           <Routes>

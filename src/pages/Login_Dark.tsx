@@ -88,17 +88,24 @@ export default function LoginPage() {
               {/* Logo */}
               <Box sx={{ textAlign: 'center', mb: 4 }}>
                 <Box
-                  component="img"
-                  src="/apex-logo.svg"
-                  alt="APEX Logo"
                   sx={{
                     width: 64,
                     height: 64,
+                    borderRadius: 3,
+                    background: 'linear-gradient(135deg, #4A90E2 0%, #2E5090 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 900,
+                    fontSize: '2rem',
+                    color: 'white',
                     margin: '0 auto',
                     mb: 2,
-                    filter: 'drop-shadow(0 8px 24px rgba(74, 144, 226, 0.3))',
+                    boxShadow: '0 8px 24px rgba(74, 144, 226, 0.3)',
                   }}
-                />
+                >
+                  A
+                </Box>
                 <Typography variant="h4" fontWeight={900} gutterBottom>
                   APEX
                 </Typography>
