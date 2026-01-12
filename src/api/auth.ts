@@ -37,4 +37,23 @@ export const authApi = {
     localStorage.removeItem('apex_token');
     localStorage.removeItem('apex_user');
   },
+
+  /**
+   * Request password reset
+   */
+  forgotPassword: async (email: string): Promise<void> => {
+    await apiClient.post('/users/forgot-password', { email });
+  },
+
+  /**
+   * Reset password with token
+   */
+  resetPassword: async (data: {
+    email: string;
+    token: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Promise<void> => {
+    await apiClient.post('/users/reset-password', data);
+  },
 };

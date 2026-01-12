@@ -184,15 +184,30 @@ export default function LoginPage() {
 
               {/* Demo Credentials */}
               <Box sx={{ mt: 4, p: 2, bgcolor: 'rgba(255, 255, 255, 0.03)', borderRadius: 2 }}>
-                <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
-                  Demo Credentials:
-                </Typography>
-                <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                  Email: demo@apex.com
-                </Typography>
-                <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                  Password: demo123
-                </Typography>
+                <Box display="flex" justifyContent="right" alignItems="center" justifyItems="center" gap={2} sx={{ border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                  <Box sx={{ p: 2 }}>
+                    <Button
+                      type="button"
+                      variant="contained"
+                      fullWidth
+                      size="small"
+                      disabled={loading}
+                      onClick={() => navigate('/forgot-password')}
+                      sx={{
+                        py: 1.0,
+                        background: 'linear-gradient(135deg, #0072E5 0%, #003A75 100%)',
+                        boxShadow: '0 4px 16px rgba(74, 144, 226, 0.3)',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #0072E5 0%, #003A75 100%)',
+                          boxShadow: '0 6px 20px rgba(74, 144, 226, 0.4)',
+                        },
+                      }}
+                    >
+                      {loading ? 'Forgetting...' : 'Forgot password.'}
+                    </Button>
+                    
+                  </Box>
+                </Box>
               </Box>
             </CardContent>
           </Card>

@@ -192,6 +192,20 @@ export default function LoginPage() {
               {/* Demo Credentials */}
               <Box sx={{ mt: 4, p: 2, bgcolor: 'rgba(255, 255, 255, 0.03)', borderRadius: 2 }}>
                 <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                  Forgot Password? Use:
+                </Typography>
+                <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                  Email: demo@apex.com
+                </Typography>
+                <IconButton
+                  size="small"
+                  onClick={() => navigate('/forgot-password')}
+                  sx={{ mt: 1 }}
+                >
+                  <Lock fontSize="small" />
+                </IconButton>
+
+                <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
                   Demo Credentials:
                 </Typography>
                 <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>

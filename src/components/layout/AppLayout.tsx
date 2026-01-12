@@ -34,6 +34,7 @@ import {
   ChevronLeft,
   LightMode,
   DarkMode,
+  ChecklistRtl
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -81,6 +82,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
     { text: 'Project Requests', icon: <Assignment />, path: '/project-requests' },
     { text: 'Projects', icon: <FolderOpen />, path: '/projects' },
+    { text: 'Change Requests', icon: <ChecklistRtl />, path: '/change-requests' }
   ];
 
   const drawer = (

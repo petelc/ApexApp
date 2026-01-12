@@ -5,10 +5,16 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 // Pages
 import LoginPage from '@/pages/Login';
+import ForgotPasswordPage from './pages/ForgotPassword';
+import ResetPasswordPage from './pages/ResetPassword';
 import DashboardPage from '@/pages/Dashboard';
 import ProjectRequestsPage from '@/pages/ProjectRequests';
 import ProjectsPage from '@/pages/Projects';
 import TasksPage from '@/pages/Tasks';
+import ChangeRequestsPage from '@/pages/ChangeRequests';
+import ChangeRequestDetailPage from '@/pages/ChangeRequestDetail';
+import ChangeAnalyticsPage from '@/pages/ChangeAnalytics';
+
 import NotFoundPage from '@/pages/NotFound';
 
 function App() {
@@ -19,6 +25,8 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             {/* Protected Routes */}
             <Route
@@ -65,6 +73,63 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/change-requests"
+              element={
+                <ProtectedRoute>
+                  <ChangeRequestsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/change-requests/:id"
+              element={
+                <ProtectedRoute>
+                  <ChangeRequestDetailPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/change-analytics"
+              element={
+                <ProtectedRoute>
+                  <ChangeAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/change-requests"
+              element={
+                <ProtectedRoute>
+                  <ChangeRequestsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            // Add route
+            <Route
+              path="/change-requests/:id"
+              element={
+                <ProtectedRoute>
+                  <ChangeRequestDetailPage />
+                </ProtectedRoute>
+              }
+            />
+
+            // Add route
+            <Route
+              path="/change-analytics"
+              element={
+                <ProtectedRoute>
+                  <ChangeAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
+
 
             {/* 404 */}
             <Route path="*" element={<NotFoundPage />} />
