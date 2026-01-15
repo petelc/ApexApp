@@ -43,12 +43,12 @@ const StatCard = ({ title, value, change, icon, color, trend = 'up' }: StatCardP
     <Card
       sx={{
         height: '100%',
-        background: `linear-gradient(135deg, ${alpha(theme.palette[color as keyof typeof theme.palette].main, 0.1)} 0%, transparent 100%)`,
-        border: `1px solid ${alpha(theme.palette[color as keyof typeof theme.palette].main, 0.2)}`,
+        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, transparent 100%)`,
+        border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
         transition: 'all 0.3s ease',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: `0 8px 24px ${alpha(theme.palette[color as keyof typeof theme.palette].main, 0.2)}`,
+          boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.2)}`,
         },
       }}
     >
@@ -62,8 +62,8 @@ const StatCard = ({ title, value, change, icon, color, trend = 'up' }: StatCardP
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: `linear-gradient(135deg, ${theme.palette[color as keyof typeof theme.palette].main} 0%, ${theme.palette[color as keyof typeof theme.palette].dark} 100%)`,
-              boxShadow: `0 4px 12px ${alpha(theme.palette[color as keyof typeof theme.palette].main, 0.3)}`,
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+              boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
             }}
           >
             {icon}
@@ -300,7 +300,7 @@ export default function DashboardPage() {
           {/* Stats Grid */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
             {stats.map((stat, index) => (
-              <Grid item xs={12} sm={6} lg={3} key={index}>
+              <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={index}>
                 <StatCard {...stat} />
               </Grid>
             ))}
@@ -309,7 +309,7 @@ export default function DashboardPage() {
           {/* Content Grid */}
           <Grid container spacing={3}>
             {/* Recent Activity */}
-            <Grid item xs={12} lg={8}>
+            <Grid size={{ xs:12, lg: 8 }}>
               <Card>
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -335,7 +335,7 @@ export default function DashboardPage() {
             </Grid>
 
             {/* Quick Actions */}
-            <Grid item xs={12} lg={4}>
+            <Grid size={{ xs:12, lg: 4 }}>
               <Card sx={{ mb: 3 }}>
                 <CardContent>
                   <Typography variant="h6" fontWeight={600} gutterBottom>
