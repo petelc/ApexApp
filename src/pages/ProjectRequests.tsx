@@ -18,6 +18,7 @@ import {
   Menu,
   MenuItem as MenuItemComponent,
   CircularProgress,
+  Avatar,
 } from '@mui/material';
 import {
   Add,
@@ -182,7 +183,7 @@ export default function ProjectRequestsPage() {
       {/* Requests Grid */}
       <Grid container spacing={3}>
         {requests.map((request) => (
-          <Grid item xs={12} md={6} lg={4} key={request.id}>
+          <Grid size={{ xs: 12, md: 6, lg: 4 }} key={request.id}>
             <Card>
               <CardContent>
                 <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
@@ -217,9 +218,22 @@ export default function ProjectRequestsPage() {
                 </Typography>
 
                 <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="caption" color="text.secondary">
+                  {/* <Typography variant="caption" color="text.secondary">
                     {request.requestedByName || 'Unknown'}
-                  </Typography>
+                  </Typography> */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Avatar sx={{ width: 32, height: 32 }}>
+                      {request.requestingUser?.fullName?.[0] || '?'}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" fontWeight={600}>
+                        {request.requestingUser?.fullName || 'Unknown User'}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {request.requestingUser?.email}
+                      </Typography>
+                      </Box>
+                    </Box>
                   <Typography variant="caption" color="text.secondary">
                     {format(new Date(request.createdDate), 'MMM d, yyyy')}
                   </Typography>

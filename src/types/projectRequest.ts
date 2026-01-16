@@ -20,6 +20,17 @@ export interface ProjectRequest {
   businessJustification: string;
   status: ProjectRequestStatus;
   priority: RequestPriority;
+  requestingUserId: string;
+  requestingUser?: {  // NEW!
+    id: string;
+    fullName: string;
+    email: string;
+  };
+  reviewedByUser?: {  // NEW!
+    id: string;
+    fullName: string;
+    email: string;
+  };
   requestedByUserId: string;
   requestedByName?: string;
   submittedDate?: string;
