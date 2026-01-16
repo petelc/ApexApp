@@ -197,7 +197,7 @@ export default function ChangeAnalyticsPage() {
               {/* KPI Cards */}
               <Grid container spacing={3} sx={{ mb: 4 }}>
                 {/* Total Changes */}
-                <Grid item xs={12} sm={6} lg={3}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
                   <Card
                     sx={{
                       height: '100%',
@@ -240,7 +240,7 @@ export default function ChangeAnalyticsPage() {
                 </Grid>
 
                 {/* Success Rate */}
-                <Grid item xs={12} sm={6} lg={3}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
                   <Card
                     sx={{
                       height: '100%',
@@ -283,7 +283,7 @@ export default function ChangeAnalyticsPage() {
                 </Grid>
 
                 {/* Average Completion Time */}
-                <Grid item xs={12} sm={6} lg={3}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
                   <Card
                     sx={{
                       height: '100%',
@@ -326,7 +326,7 @@ export default function ChangeAnalyticsPage() {
                 </Grid>
 
                 {/* In Progress */}
-                <Grid item xs={12} sm={6} lg={3}>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
                   <Card
                     sx={{
                       height: '100%',
@@ -372,7 +372,7 @@ export default function ChangeAnalyticsPage() {
               {/* Charts Row 1 */}
               <Grid container spacing={3} sx={{ mb: 3 }}>
                 {/* Success Rate Pie Chart */}
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Card>
                     <CardContent>
                       {successRate && <SuccessRatePieChart data={successRate} />}
@@ -381,7 +381,7 @@ export default function ChangeAnalyticsPage() {
                 </Grid>
 
                 {/* Type Distribution */}
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Card>
                     <CardContent>
                       <Typography variant="h6" fontWeight={600} gutterBottom>
@@ -464,7 +464,7 @@ export default function ChangeAnalyticsPage() {
               {/* Charts Row 2 */}
               <Grid container spacing={3}>
                 {/* Monthly Trends */}
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <Card>
                     <CardContent>
                       <MonthlyTrendsChart data={trends} />
@@ -473,7 +473,7 @@ export default function ChangeAnalyticsPage() {
                 </Grid>
 
                 {/* Top Systems */}
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <Card>
                     <CardContent>
                       <TopSystemsChart data={topSystems} />
