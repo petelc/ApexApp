@@ -10,8 +10,9 @@ import {
   Button,
   CircularProgress,
   Alert,
+  Avatar,
 } from '@mui/material';
-import { FolderOpen, PlayArrow, CheckCircle } from '@mui/icons-material';
+import { FolderOpen, PlayArrow, CheckCircle, Add } from '@mui/icons-material';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { projectApi } from '@/api/projects';
@@ -24,6 +25,7 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
 
   useEffect(() => {
     loadProjects();
@@ -40,6 +42,8 @@ export default function ProjectsPage() {
       setLoading(false);
     }
   };
+
+ 
 
   const handleStart = async (id: string) => {
     try {
@@ -65,13 +69,14 @@ export default function ProjectsPage() {
       <title>Projects - APEX</title>
       <AppLayout>
 
-      <Box mb={3}>
+      <Box display="flex" flexDirection={'column'} justifyContent="space-between" alignItems="flex-start" mb={3}>
         <Typography variant="h4" fontWeight={700} gutterBottom>
           Projects
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Manage active projects and tasks
-        </Typography>
+          </Typography>
+          
       </Box>
 
       {error && (
@@ -82,8 +87,9 @@ export default function ProjectsPage() {
 
       <Grid container spacing={3}>
         {projects.map((project) => (
-          <Grid item xs={12} md={6} lg={4} key={project.id}>
-            <Card>
+          <Grid size={{ xs: 12, md: 6, lg: 4 }} key={ project.id }>
+            <Card sx={{ cursor: 'pointer', '&:hover': { boxShadow: 4 } }}
+                  onClick={() => navigate(`/projects/${project.id}`)}>
               <CardContent>
                 <Box display="flex" alignItems="flex-start" mb={2}>
                   <FolderOpen color="primary" sx={{ mr: 1 }} />
@@ -91,7 +97,7 @@ export default function ProjectsPage() {
                     <Typography variant="h6" fontWeight={600} gutterBottom>
                       {project.name}
                     </Typography>
-                    <StatusBadge status={project.status} />
+                    <StatusBadge status={project.status} size='small' />
                   </Box>
                 </Box>
 
@@ -99,9 +105,24 @@ export default function ProjectsPage() {
                   {project.description}
                 </Typography>
 
-                <Typography variant="caption" color="text.secondary">
-                  Created {format(new Date(project.createdDate), 'MMM d, yyyy')}
-                </Typography>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Avatar sx={{ width: 32, height: 32 }}>
+                      {project.createdByUser?.fullName?.[0] || '?'}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" fontWeight={600}>
+                        {project.createdByUser?.fullName || 'Unknown User'}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {project.createdByUser?.email}
+                      </Typography>
+                      </Box>
+                    </Box>
+                  <Typography variant="caption" color="text.secondary">
+                    {format(new Date(project.createdDate), 'MMM d, yyyy')}
+                  </Typography>
+                </Box>
               </CardContent>
 
               <CardActions>
@@ -109,14 +130,20 @@ export default function ProjectsPage() {
                   <Button
                     size="small"
                     startIcon={<PlayArrow />}
-                    onClick={() => handleStart(project.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStart(project.id)
+                    }}
                   >
                     Start Project
                   </Button>
                 )}
                 <Button
                   size="small"
-                  onClick={() => navigate(`/projects/${project.id}/tasks`)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/projects/${project.id}/tasks`)
+                  }}
                 >
                   View Tasks
                 </Button>

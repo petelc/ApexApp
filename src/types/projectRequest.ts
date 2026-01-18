@@ -38,6 +38,17 @@ export interface ProjectRequest {
   reviewedByUserId?: string;
   reviewedByName?: string;
   reviewNotes?: string;
+  approvalDate?: string;
+  approvedByUserId?: string;
+  approvedByUser?: {  // NEW!
+    id: string;
+    fullName: string;
+    email: string;
+  };
+  approvedDate?: string;
+  approvalNotes?: string;
+  denialReason?: string;
+  cancellationReason?: string;
   createdDate: string;
   lastModifiedDate?: string;
   convertedToProjectId?: string;

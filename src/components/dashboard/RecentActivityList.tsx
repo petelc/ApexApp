@@ -5,11 +5,10 @@ import {
   CardContent,
   Typography,
   List,
-  ListItem,
   ListItemText,
-  Chip,
   Box,
   Divider,
+  ListItemButton,
 } from '@mui/material';
 import { format } from 'date-fns';
 import { StatusBadge } from '@/components/common/StatusBadge';
@@ -36,7 +35,7 @@ export function RecentActivityList({
   return (
     <Card>
       <CardContent>
-        <Typography variant="h6" fontWeight={600} gutterBottom>
+        <Typography variant="h5" fontWeight={600} gutterBottom>
           {title}
         </Typography>
 
@@ -49,25 +48,23 @@ export function RecentActivityList({
         ) : (
           <List disablePadding>
             {items.map((item, index) => (
-              <Box key={item.id}>
+              <Box key={item.id} >
                 {index > 0 && <Divider sx={{ my: 1 }} />}
-                <ListItem disablePadding sx={{ py: 1 }}>
-                  <ListItemText
-                    primary={
-                      <Typography variant="body2" fontWeight={500}>
-                        {item.title}
-                      </Typography>
-                    }
-                    secondary={
-                      <Box display="flex" alignItems="center" gap={1} mt={0.5}>
-                        <StatusBadge status={item.status} size="small" />
-                        <Typography variant="caption" color="text.secondary">
-                          {format(new Date(item.date), 'MMM d, yyyy')}
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                </ListItem>
+                <Box display="flex" justifyContent="space-around" alignItems="center" mb={1}>
+                <StatusBadge status={item.status} size="small" />
+                <ListItemButton key={item.id}
+                        sx={{ py: 0, minHeight: 32, color: 'rgba(255,255,255,.8)' }} >
+                    
+                    <ListItemText
+                      primary={item.title}
+                      secondary={
+                        <>
+                          {format(new Date(item.date), 'PPP')}
+                        </>
+                      }
+                    />
+                </ListItemButton>
+                </Box>
               </Box>
             ))}
           </List>
