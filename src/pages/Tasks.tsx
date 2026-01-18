@@ -16,7 +16,8 @@ import {
   MenuItem,
   CircularProgress,
   Alert,
-  Divider
+  Divider,
+  Avatar
 } from '@mui/material';
 import { Add, PlayArrow, CheckCircle, Block, DetailsRounded } from '@mui/icons-material';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -25,6 +26,8 @@ import { taskApi } from '@/api/tasks';
 import { getErrorMessage } from '@/api/client';
 import type { Task, CreateTaskRequest, UpdateTaskRequest } from '@/types/project';
 import { SideDrawer } from '@/components/common/SideDrawer';
+
+import { format } from 'date-fns';
 
 export default function TasksPage() {
   const { id: projectId } = useParams<{ id: string }>();
@@ -123,7 +126,7 @@ export default function TasksPage() {
     completed: tasks.filter((t) => t.status === 'Completed'),
   };
 
-  if (loading) {
+  if (loading || createLoading) {
     return (
       <AppLayout>
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -179,6 +182,24 @@ export default function TasksPage() {
                   <Typography variant="caption" color="text.secondary">
                     {task.description}
                   </Typography>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mt:1, mb:1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Avatar sx={{ width: 32, height: 32 }}>
+                        {task.createdByUser?.fullName?.[0] || '?'}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="body2" fontWeight={600}>
+                          {task.createdByUser?.fullName || 'Unknown User'}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {task.createdByUser?.email}
+                        </Typography>
+                        </Box>
+                      </Box>
+                    <Typography variant="caption" color="text.secondary">
+                      {format(new Date(task.createdDate), 'MMM d, yyyy')}
+                    </Typography>
+                  </Box>
                   <Box mt={1}>
                     <Chip label={task.priority} size="small" />
                   </Box>
@@ -228,7 +249,7 @@ export default function TasksPage() {
                     {task.title}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {task.assignedToUserName || 'Unassigned'}
+                    {task.assignedToUser?.fullName || 'Unassigned'}
                   </Typography>
                   <Box mt={1}>
                     <Typography variant="caption">

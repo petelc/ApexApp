@@ -25,7 +25,6 @@ import {
   MoreVert,
   Send,
   CheckCircle,
-  Cancel,
   Transform,
 } from '@mui/icons-material';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -35,9 +34,11 @@ import { getErrorMessage } from '@/api/client';
 import { useAuth } from '@/contexts/AuthContext';
 import type { ProjectRequest, RequestPriority } from '@/types/projectRequest';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 export default function ProjectRequestsPage() {
   const { hasRole } = useAuth();
+  const navigate = useNavigate();
   const [requests, setRequests] = useState<ProjectRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -167,7 +168,10 @@ export default function ProjectRequestsPage() {
         <Button
           variant="contained"
           startIcon={<Add />}
-          onClick={() => setCreateDialogOpen(true)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setCreateDialogOpen(true);
+          }}
         >
           New Request
         </Button>
@@ -184,14 +188,15 @@ export default function ProjectRequestsPage() {
       <Grid container spacing={3}>
         {requests.map((request) => (
           <Grid size={{ xs: 12, md: 6, lg: 4 }} key={request.id}>
-            <Card>
+            <Card sx={{ cursor: 'pointer', '&:hover': { boxShadow: 4 } }}
+                  onClick={() => navigate(`/project-requests/${request.id}`)}>
               <CardContent>
                 <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
                   <Box flex={1}>
                     <Typography variant="h6" fontWeight={600} gutterBottom>
                       {request.title}
                     </Typography>
-                    <StatusBadge status={request.status} />
+                    <StatusBadge status={request.status} size='small' />
                     <Chip
                       label={request.priority}
                       size="small"
@@ -207,7 +212,10 @@ export default function ProjectRequestsPage() {
                   </Box>
                   <IconButton
                     size="small"
-                    onClick={(e) => handleActionClick(e, request)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleActionClick(e, request)
+                    }}
                   >
                     <MoreVert />
                   </IconButton>
@@ -218,9 +226,6 @@ export default function ProjectRequestsPage() {
                 </Typography>
 
                 <Box display="flex" justifyContent="space-between" alignItems="center">
-                  {/* <Typography variant="caption" color="text.secondary">
-                    {request.requestedByName || 'Unknown'}
-                  </Typography> */}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Avatar sx={{ width: 32, height: 32 }}>
                       {request.requestingUser?.fullName?.[0] || '?'}
@@ -256,7 +261,10 @@ export default function ProjectRequestsPage() {
           <Button
             variant="contained"
             startIcon={<Add />}
-            onClick={() => setCreateDialogOpen(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setCreateDialogOpen(true)
+              }}
           >
             Create Request
           </Button>

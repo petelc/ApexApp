@@ -9,10 +9,14 @@ import ForgotPasswordPage from './pages/ForgotPassword';
 import ResetPasswordPage from './pages/ResetPassword';
 import DashboardPage from '@/pages/Dashboard';
 import ProjectRequestsPage from '@/pages/ProjectRequests';
+import ProjectRequestDetailPage from '@/pages/ProjectRequestDetail';
 import ProjectsPage from '@/pages/Projects';
+import ProjectDetailPage from '@/pages/ProjectDetail';
 import TasksPage from '@/pages/Tasks';
+import TaskDetailPage from '@/pages/TaskDetail';
 import ChangeRequestsPage from '@/pages/ChangeRequests';
 import ChangeRequestDetailPage from '@/pages/ChangeRequestDetail';
+import ChangeRequestEditPage from '@/pages/EditChangeRequest';
 import ChangeAnalyticsPage from '@/pages/ChangeAnalytics';
 
 import NotFoundPage from '@/pages/NotFound';
@@ -47,6 +51,7 @@ function App() {
               }
             />
 
+            {/* Project Requests */}
             <Route
               path="/project-requests"
               element={
@@ -55,7 +60,17 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            
+            <Route
+              path="/project-requests/:id"
+              element={
+                <ProtectedRoute>
+                  <ProjectRequestDetailPage />
+                </ProtectedRoute>
+              }
+            />
 
+            {/* Projects */}
             <Route
               path="/projects"
               element={
@@ -64,7 +79,17 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            
+            <Route
+              path="/projects/:id"
+              element={
+                <ProtectedRoute>
+                  <ProjectDetailPage />
+                </ProtectedRoute>
+              }
+            />
 
+            {/* Tasks */}
             <Route
               path="/projects/:id/tasks"
               element={
@@ -73,7 +98,17 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            
+            <Route
+              path="/projects/:id/tasks/:taskId"
+              element={
+                <ProtectedRoute>
+                  <TaskDetailPage />
+                </ProtectedRoute>
+              }
+            />
 
+            {/* Change Requests */}
             <Route
               path="/change-requests"
               element={
@@ -102,34 +137,13 @@ function App() {
             />
 
             <Route
-              path="/change-requests"
+              path="/change-requests/:id/edit"
               element={
                 <ProtectedRoute>
-                  <ChangeRequestsPage />
+                  <ChangeRequestEditPage />
                 </ProtectedRoute>
               }
             />
-
-            // Add route
-            <Route
-              path="/change-requests/:id"
-              element={
-                <ProtectedRoute>
-                  <ChangeRequestDetailPage />
-                </ProtectedRoute>
-              }
-            />
-
-            // Add route
-            <Route
-              path="/change-analytics"
-              element={
-                <ProtectedRoute>
-                  <ChangeAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
-
 
             {/* 404 */}
             <Route path="*" element={<NotFoundPage />} />

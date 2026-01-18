@@ -4,6 +4,7 @@ type Status = string;
 
 interface StatusBadgeProps {
   status: Status;
+  size: 'small' | 'medium';
 }
 
 const statusColors: Record<string, 'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success'> = {
@@ -28,7 +29,7 @@ const statusColors: Record<string, 'default' | 'primary' | 'secondary' | 'error'
   Blocked: 'error',
 };
 
-export const StatusBadge = ({ status }: StatusBadgeProps) => {
+export const StatusBadge = ({ status, size }: StatusBadgeProps) => {
   // Convert camelCase to spaces
   const displayText = status.replace(/([A-Z])/g, ' $1').trim();
   
@@ -36,7 +37,7 @@ export const StatusBadge = ({ status }: StatusBadgeProps) => {
     <Chip
       label={displayText}
       color={statusColors[status] || 'default'}
-      size="small"
+      size={size}
     />
   );
 };

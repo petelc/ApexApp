@@ -15,15 +15,34 @@ export interface Project {
   description: string;
   status: ProjectStatus;
   priority: string;
+  budget?: number;
   projectManagerUserId?: string;
-  projectManagerName?: string;
+  projectManager?: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
+  // projectManagerName?: string;
   startDate?: string;
+  endDate?: string;
+  actualStartDate?: string;
+  actualEndDate?: string;
   targetCompletionDate?: string;
   actualCompletionDate?: string;
   createdByUserId: string;
-  createdByName?: string;
+  createdByUser?: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
+  //createdByName?: string;
   createdDate: string;
   lastModifiedDate?: string;
+  isOverdue?: boolean;
+  durationDays?: number;
+  daysRemaining?: number;
+  totalTasks?: number;
+  completedTasks?: number;
   convertedFromRequestId?: string;
 }
 
@@ -46,11 +65,20 @@ export interface Task {
   status: TaskStatus;
   priority: string;
   assignedToUserId?: string;
-  assignedToUserName?: string;
+  assignedToUser?: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
+  // assignedToName?: string;
   assignedToDepartmentId?: string;
   assignedToDepartmentName?: string;
   createdByUserId: string;
-  createdByName?: string;
+  createdByUser?: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
   estimatedHours?: number;
   actualHours: number;
   dueDate?: string;
