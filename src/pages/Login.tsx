@@ -183,30 +183,18 @@ export default function LoginPage() {
               </form>
 
               {/* Demo Credentials */}
-              <Box sx={{ mt: 4, p: 2, bgcolor: 'rgba(255, 255, 255, 0.03)', borderRadius: 2 }}>
-                <Box display="flex" justifyContent="right" alignItems="center" justifyItems="center" gap={2} sx={{ border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                  <Box sx={{ p: 2 }}>
-                    <Button
-                      type="button"
-                      variant="contained"
-                      fullWidth
-                      size="small"
-                      disabled={loading}
-                      onClick={() => navigate('/forgot-password')}
-                      sx={{
-                        py: 1.0,
-                        background: 'linear-gradient(135deg, #0072E5 0%, #003A75 100%)',
-                        boxShadow: '0 4px 16px rgba(74, 144, 226, 0.3)',
-                        '&:hover': {
-                          background: 'linear-gradient(135deg, #0072E5 0%, #003A75 100%)',
-                          boxShadow: '0 6px 20px rgba(74, 144, 226, 0.4)',
-                        },
-                      }}
-                    >
-                      {loading ? 'Forgetting...' : 'Forgot password.'}
-                    </Button>
-                    
-                  </Box>
+              <Box sx={{ mt: 2, p: 0.5, bgcolor: 'rgba(255, 255, 255, 0.03)', borderRadius: 2 }} justifyItems={'flex-end'}>
+                <Box sx={{ p: 1 }}>
+                  <IconButton
+                    size="small"
+                    onClick={() => navigate('/forgot-password')}
+                    sx={{ mt: 1 }}
+                  >
+                    <Lock fontSize="small" /> 
+                    <Typography variant="overline" gutterBottom sx={{ display: 'block', mt: 1 }}>
+                      Forgot Password?
+                    </Typography>
+                  </IconButton>
                 </Box>
               </Box>
             </CardContent>

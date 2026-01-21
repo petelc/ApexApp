@@ -11,6 +11,7 @@ import {
   InputAdornment,
   IconButton,
   Divider,
+  Input,
 } from '@mui/material';
 import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -133,13 +134,16 @@ export default function LoginPage() {
                   required
                   autoFocus
                   sx={{ mb: 2 }}
-                  InputProps={{
+                  slotProps={{
+                    input: {
                     startAdornment: (
                       <InputAdornment position="start">
                         <Email color="action" />
                       </InputAdornment>
                     ),
+                    },
                   }}
+                  
                 />
 
                 <TextField
@@ -150,22 +154,24 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   sx={{ mb: 3 }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Lock color="action" />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Lock color="action" />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
                   }}
                 />
 

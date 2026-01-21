@@ -16,6 +16,7 @@ import TasksPage from '@/pages/Tasks';
 import TaskDetailPage from '@/pages/TaskDetail';
 import ChangeRequestsPage from '@/pages/ChangeRequests';
 import ChangeRequestDetailPage from '@/pages/ChangeRequestDetail';
+import CreateChangeRequestPage from '@/pages/CreateChangeRequest';
 import ChangeRequestEditPage from '@/pages/EditChangeRequest';
 import ChangeAnalyticsPage from '@/pages/ChangeAnalytics';
 
@@ -123,6 +124,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ChangeRequestDetailPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/change-requests/create"
+              element={
+                <ProtectedRoute>
+                  <CreateChangeRequestPage />
                 </ProtectedRoute>
               }
             />
