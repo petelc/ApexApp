@@ -6,6 +6,38 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
+/**
+ * Convert PascalCase string to camelCase
+ */
+const toCamelCase = (str: string): string => {
+  return str.charAt(0).toLowerCase() + str.slice(1);
+};
+
+/**
+ * Recursively transform object keys from PascalCase to camelCase
+ * Handles ASP.NET API responses which use PascalCase by default
+ */
+const transformKeysToCamelCase = (obj: unknown): unknown => {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(transformKeysToCamelCase);
+  }
+
+  if (typeof obj === 'object') {
+    const transformed: Record<string, unknown> = {};
+    for (const key of Object.keys(obj as Record<string, unknown>)) {
+      const camelKey = toCamelCase(key);
+      transformed[camelKey] = transformKeysToCamelCase((obj as Record<string, unknown>)[key]);
+    }
+    return transformed;
+  }
+
+  return obj;
+};
+
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -31,10 +63,16 @@ apiClient.interceptors.request.use(
 );
 
 /**
- * Response Interceptor - Handle errors
+ * Response Interceptor - Transform keys and handle errors
  */
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Transform PascalCase keys from ASP.NET API to camelCase
+    if (response.data) {
+      response.data = transformKeysToCamelCase(response.data);
+    }
+    return response;
+  },
   (error: AxiosError) => {
     // Handle 401 Unauthorized - logout
     if (error.response?.status === 401) {
