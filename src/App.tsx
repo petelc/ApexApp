@@ -21,6 +21,7 @@ import ChangeRequestEditPage from '@/pages/EditChangeRequest';
 import ChangeAnalyticsPage from '@/pages/ChangeAnalytics';
 
 import NotFoundPage from '@/pages/NotFound';
+import EditProjectRequestPage from './pages/EditProjectRequest';
 
 function App() {
   return (
@@ -86,6 +87,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ProjectDetailPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/project-requests/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <EditProjectRequestPage />
                 </ProtectedRoute>
               }
             />

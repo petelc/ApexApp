@@ -20,13 +20,19 @@ export interface ProjectRequest {
   businessJustification: string;
   status: ProjectRequestStatus;
   priority: RequestPriority;
+  dueDate: string;
+  estimatedBudget: number;
+  proposedStartDate: string;
+  proposedEndDate: string;
   requestingUserId: string;
-  requestingUser?: {  // NEW!
+  requestingUser?: {
+    // NEW!
     id: string;
     fullName: string;
     email: string;
   };
-  reviewedByUser?: {  // NEW!
+  reviewedByUser?: {
+    // NEW!
     id: string;
     fullName: string;
     email: string;
@@ -40,7 +46,8 @@ export interface ProjectRequest {
   reviewNotes?: string;
   approvalDate?: string;
   approvedByUserId?: string;
-  approvedByUser?: {  // NEW!
+  approvedByUser?: {
+    // NEW!
     id: string;
     fullName: string;
     email: string;
@@ -59,6 +66,21 @@ export interface CreateProjectRequestRequest {
   description: string;
   businessJustification: string;
   priority: RequestPriority;
+}
+
+export interface UpdateProjectRequestRequest {
+  title?: string;
+  description?: string;
+  businessJustification?: string;
+  priority?: RequestPriority;
+  dueDate?: string | null;
+  estimatedBudget?: number | null;
+  proposedStartDate?: string | null;
+  proposedEndDate?: string | null;
+  reviewNotes?: string;
+  approvalNotes?: string;
+  denialReason?: string;
+  cancellationReason?: string;
 }
 
 export interface ProjectRequestListResponse {

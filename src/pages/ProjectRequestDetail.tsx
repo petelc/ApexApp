@@ -15,6 +15,8 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  alpha,
+    useTheme,
 } from '@mui/material';
 import {
   ArrowBack,
@@ -23,6 +25,7 @@ import {
   CheckCircle,
   Cancel,
   Transform,
+  Edit,
 } from '@mui/icons-material';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatusBadge } from '@/components/common/StatusBadge';
@@ -32,10 +35,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { ProjectRequest } from '@/types/projectRequest';
 import { format } from 'date-fns';
 
+
 export default function ProjectRequestDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { hasRole } = useAuth();
+  const theme = useTheme();
   
   const [request, setRequest] = useState<ProjectRequest | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,6 +78,13 @@ export default function ProjectRequestDetailPage() {
 
   const handleActionClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleEdit = () => {
+    if (!request) return;
+    
+    navigate(`/project-requests/${id}/edit`);
+    
   };
 
   const handleSubmit = async () => {
@@ -278,12 +290,12 @@ export default function ProjectRequestDetailPage() {
 
             {/* Cancellation Reason */}
             {request.cancellationReason && (
-              <Card>
+              <Card sx={{ mb: 3 }}>
                 <CardContent>
                   <Typography variant="h6" fontWeight={600} gutterBottom>
                     Cancellation Reason
                   </Typography>
-                  <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.100' }}>
+                  <Paper variant="outlined" sx={{ p: 2, bgcolor: alpha(theme.palette.grey[100], 0.5) }}>
                     <Typography variant="body2">{request.cancellationReason}</Typography>
                   </Paper>
                 </CardContent>
@@ -419,12 +431,18 @@ export default function ProjectRequestDetailPage() {
           open={Boolean(anchorEl)}
           onClose={handleActionClose}
         >
-          {request.status === 'Draft' && (
+          {request.status === 'Draft' && [
+            
             <MenuItem onClick={handleSubmit}>
               <Send fontSize="small" sx={{ mr: 1 }} />
               Submit for Approval
+            </MenuItem>,
+            <MenuItem onClick={handleEdit}>
+              <Edit fontSize="small" sx={{ mr: 1 }} />
+              Edit Request
             </MenuItem>
-          )}
+        
+          ]}
           {request.status === 'Pending' && hasRole('TenantAdmin') && [
             <MenuItem key="approve" onClick={handleApprove}>
               <CheckCircle fontSize="small" sx={{ mr: 1 }} />
@@ -452,3 +470,7 @@ export default function ProjectRequestDetailPage() {
     </>
   );
 }
+function setSuccessMessage(arg0: string) {
+  throw new Error('Function not implemented.');
+}
+
