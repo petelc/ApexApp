@@ -2,6 +2,7 @@ import { apiClient } from './client';
 import type {
   ProjectRequest,
   CreateProjectRequestRequest,
+  UpdateProjectRequestRequest,
   ProjectRequestListResponse,
 } from '@/types/projectRequest';
 
@@ -51,8 +52,16 @@ export const projectRequestApi = {
    * Create new project request
    */
   create: async (data: CreateProjectRequestRequest): Promise<{ projectRequestId: string }> => {
+    
     const response = await apiClient.post('/project-requests', data);
     return response.data;
+  },
+
+  /**
+   * Update existing project request
+   */
+  update: async (id: string, data: Partial<UpdateProjectRequestRequest>): Promise<void> => {
+    await apiClient.put(`/project-requests/${id}`, data);
   },
 
   /**

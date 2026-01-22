@@ -16,10 +16,12 @@ import TasksPage from '@/pages/Tasks';
 import TaskDetailPage from '@/pages/TaskDetail';
 import ChangeRequestsPage from '@/pages/ChangeRequests';
 import ChangeRequestDetailPage from '@/pages/ChangeRequestDetail';
+import CreateChangeRequestPage from '@/pages/CreateChangeRequest';
 import ChangeRequestEditPage from '@/pages/EditChangeRequest';
 import ChangeAnalyticsPage from '@/pages/ChangeAnalytics';
 
 import NotFoundPage from '@/pages/NotFound';
+import EditProjectRequestPage from './pages/EditProjectRequest';
 
 function App() {
   return (
@@ -89,6 +91,15 @@ function App() {
               }
             />
 
+            <Route
+              path="/project-requests/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <EditProjectRequestPage />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Tasks */}
             <Route
               path="/projects/:id/tasks"
@@ -123,6 +134,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ChangeRequestDetailPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/change-requests/create"
+              element={
+                <ProtectedRoute>
+                  <CreateChangeRequestPage />
                 </ProtectedRoute>
               }
             />
