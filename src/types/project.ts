@@ -17,7 +17,7 @@ export interface Project {
   priority: string;
   budget?: number;
   projectManagerUserId?: string;
-  projectManager?: {
+  projectManagerUser?: {
     id: string;
     fullName: string;
     email: string;

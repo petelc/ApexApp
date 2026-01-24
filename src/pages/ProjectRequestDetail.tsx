@@ -577,6 +577,4 @@ export default function ProjectRequestDetailPage() {
     </>
   );
 }
-function setSuccessMessage(arg0: string) {
-  throw new Error('Function not implemented.');
-}
+//
