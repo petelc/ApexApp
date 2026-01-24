@@ -1,32 +1,53 @@
 import { apiClient } from './client';
-import { UserInfo } from '@/types/auth';
 
 /**
- * User API - used for user select options and user management
+ * User Summary - Lightweight user information for display
+ * ✅ Defined here to avoid circular imports
+ */
+export interface UserSummary {
+  id: string;
+  fullName: string;
+  email: string;
+}
+
+/**
+ * User API
  */
 
 export const userApi = {
   /**
-   * Get All Users
+   * Get users by role
    */
-  getAllUsers: async (): Promise<UserInfo[]> => {
-    const response = await apiClient.get<UserInfo[]>('/users');
+  getUsersByRole: async (role: string): Promise<UserSummary[]> => {
+    const response = await apiClient.get<UserSummary[]>(`/users/by-role/${role}`);
     return response.data;
   },
 
   /**
-   * Get User by ID
+   * Get all project managers
    */
-  getUserById: async (userId: string): Promise<UserInfo> => {
-    const response = await apiClient.get<UserInfo>(`/users/${userId}`);
-    return response.data;
+  getProjectManagers: async (): Promise<UserSummary[]> => {
+    return userApi.getUsersByRole('Project Manager');
   },
 
   /**
-   * Get Project Managers
+   * Get all change managers
    */
-  getProjectManagers: async (): Promise<UserInfo[]> => {
-    const response = await apiClient.get<UserInfo[]>('/users/project-managers');
-    return response.data;
+  getChangeManagers: async (): Promise<UserSummary[]> => {
+    return userApi.getUsersByRole('Change Manager');
+  },
+
+  /**
+   * Get all CAB members
+   */
+  getCABMembers: async (): Promise<UserSummary[]> => {
+    return userApi.getUsersByRole('CAB Member');
+  },
+
+  /**
+   * Get all CAB managers
+   */
+  getCABManagers: async (): Promise<UserSummary[]> => {
+    return userApi.getUsersByRole('CAB Manager');
   },
 };

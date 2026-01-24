@@ -19,6 +19,10 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from '@mui/material';
 import {
   ArrowBack,
@@ -29,16 +33,17 @@ import {
   MoreVert,
   Assignment,
   Add,
-  PersonAdd,
 } from '@mui/icons-material';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatusBadge } from '@/components/common/StatusBadge';
-import { AssignProjectManagerDialog } from '@/components/project/AssignProjectManagerDialog';
 import { projectApi } from '@/api/projects';
 import { taskApi } from '@/api/tasks';
 import { getErrorMessage } from '@/api/client';
 import type { Project, Task } from '@/types/project';
 import { format, differenceInDays } from 'date-fns';
+import { UserLookup } from '@/components/user/user-lookup';
+import { userApi } from '@/api/user';
+import { UserInfo } from '@/types/auth';
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -49,9 +54,17 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
-  
-  // Assign PM Dialog
-  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [projectManagers, setProjectManagers] = useState<UserInfo[]>([]);
+  const [selectedManagerId, setSelectedManagerId] = useState<string>('');
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   // Action Menu
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -60,6 +73,7 @@ export default function ProjectDetailPage() {
     if (id) {
       loadProject();
       loadTasks();
+      loadProjectManagers();
     }
   }, [id]);
 
@@ -69,6 +83,7 @@ export default function ProjectDetailPage() {
     try {
       setLoading(true);
       const data = await projectApi.getById(id);
+      console.log('Loaded Project Data:', data);
       setProject(data);
     } catch (err) {
       setError(getErrorMessage(err));
@@ -88,6 +103,33 @@ export default function ProjectDetailPage() {
     }
   };
 
+  const loadProjectManagers = async () => {
+    try {
+      // Fetch project managers from API
+      const users = await userApi.getProjectManagers();
+      setProjectManagers(users);
+    } catch (err) {
+      console.error('Error loading project managers:', err);
+    }
+  };
+
+  // const handleAssignUser = async () => {
+  //   if (!project) return;
+
+  //   try {
+  //     setActionLoading(true);
+  //     // Logic to assign user goes here
+  //     // await projectApi.assignUser(project.id, userId);
+  //     handleClose();
+  //     handleActionClose();
+  //     await loadProject();
+  //   } catch (err) {
+  //     setError(getErrorMessage(err));
+  //   } finally {
+  //     setActionLoading(false);
+  //   }
+  // };
+
   const handleActionClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -96,9 +138,20 @@ export default function ProjectDetailPage() {
     setAnchorEl(null);
   };
 
-  const handleAssignSuccess = async () => {
-    handleActionClose();
-    await loadProject();
+  const handleAssignProjectManager = async (managerId: string) => {
+    if (!project) return;
+
+    try {
+      setActionLoading(true);
+      await projectApi.assignProjectManager(project.id, managerId);
+      handleClose();
+      handleActionClose();
+      await loadProject();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleStart = async () => {
@@ -182,10 +235,10 @@ export default function ProjectDetailPage() {
     return (
       <AppLayout>
         <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          minHeight="60vh"
+          display='flex'
+          justifyContent='center'
+          alignItems='center'
+          minHeight='60vh'
         >
           <CircularProgress />
         </Box>
@@ -196,7 +249,7 @@ export default function ProjectDetailPage() {
   if (error && !project) {
     return (
       <AppLayout>
-        <Alert severity="error">{error}</Alert>
+        <Alert severity='error'>{error}</Alert>
       </AppLayout>
     );
   }
@@ -204,7 +257,7 @@ export default function ProjectDetailPage() {
   if (!project) {
     return (
       <AppLayout>
-        <Alert severity="error">Project not found</Alert>
+        <Alert severity='error'>Project not found</Alert>
       </AppLayout>
     );
   }
@@ -218,25 +271,25 @@ export default function ProjectDetailPage() {
       <AppLayout>
         {/* Header */}
         <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="flex-start"
+          display='flex'
+          justifyContent='space-between'
+          alignItems='flex-start'
           mb={3}
         >
           <Box flex={1}>
-            <Box display="flex" alignItems="center" gap={2} mb={1}>
+            <Box display='flex' alignItems='center' gap={2} mb={1}>
               <IconButton onClick={() => navigate('/projects')}>
                 <ArrowBack />
               </IconButton>
-              <Typography variant="h4" fontWeight={700}>
+              <Typography variant='h4' fontWeight={700}>
                 {project.name}
               </Typography>
             </Box>
-            <Box display="flex" alignItems="center" gap={1} ml={7}>
-              <StatusBadge status={project.status} size="small" />
+            <Box display='flex' alignItems='center' gap={1} ml={7}>
+              <StatusBadge status={project.status} size='small' />
               <Chip
                 label={project.priority}
-                size="small"
+                size='small'
                 color={
                   project.priority === 'Urgent'
                     ? 'error'
@@ -246,7 +299,7 @@ export default function ProjectDetailPage() {
                 }
               />
               {project.isOverdue && (
-                <Chip label="Overdue" size="small" color="error" />
+                <Chip label='Overdue' size='small' color='error' />
               )}
             </Box>
           </Box>
@@ -258,7 +311,7 @@ export default function ProjectDetailPage() {
 
         {/* Error Alert */}
         {error && (
-          <Alert severity="error" onClose={() => setError('')} sx={{ mb: 3 }}>
+          <Alert severity='error' onClose={() => setError('')} sx={{ mb: 3 }}>
             {error}
           </Alert>
         )}
@@ -268,47 +321,47 @@ export default function ProjectDetailPage() {
           <CardContent>
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 3 }}>
-                <Typography variant="subtitle2" color="text.secondary">
+                <Typography variant='subtitle2' color='text.secondary'>
                   Progress
                 </Typography>
-                <Box display="flex" alignItems="baseline" gap={1}>
-                  <Typography variant="h4" fontWeight={700}>
+                <Box display='flex' alignItems='baseline' gap={1}>
+                  <Typography variant='h4' fontWeight={700}>
                     {progress}%
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant='body2' color='text.secondary'>
                     complete
                   </Typography>
                 </Box>
                 <LinearProgress
-                  variant="determinate"
+                  variant='determinate'
                   value={progress}
                   sx={{ mt: 1, height: 8, borderRadius: 4 }}
                 />
               </Grid>
 
               <Grid size={{ xs: 12, md: 3 }}>
-                <Typography variant="subtitle2" color="text.secondary">
+                <Typography variant='subtitle2' color='text.secondary'>
                   Tasks
                 </Typography>
-                <Box display="flex" alignItems="baseline" gap={1}>
-                  <Typography variant="h4" fontWeight={700}>
+                <Box display='flex' alignItems='baseline' gap={1}>
+                  <Typography variant='h4' fontWeight={700}>
                     {tasks.filter((t) => t.status === 'Completed').length}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant='body2' color='text.secondary'>
                     / {tasks.length}
                   </Typography>
                 </Box>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant='caption' color='text.secondary'>
                   Completed
                 </Typography>
               </Grid>
 
               {project.budget && (
                 <Grid size={{ xs: 12, md: 3 }}>
-                  <Typography variant="subtitle2" color="text.secondary">
+                  <Typography variant='subtitle2' color='text.secondary'>
                     Budget
                   </Typography>
-                  <Typography variant="h4" fontWeight={700}>
+                  <Typography variant='h4' fontWeight={700}>
                     ${project.budget.toLocaleString()}
                   </Typography>
                 </Grid>
@@ -316,18 +369,18 @@ export default function ProjectDetailPage() {
 
               {daysRemaining !== null && (
                 <Grid size={{ xs: 12, md: 3 }}>
-                  <Typography variant="subtitle2" color="text.secondary">
+                  <Typography variant='subtitle2' color='text.secondary'>
                     Time Remaining
                   </Typography>
                   <Typography
-                    variant="h4"
+                    variant='h4'
                     fontWeight={700}
                     color={daysRemaining < 0 ? 'error' : 'inherit'}
                   >
                     {Math.abs(daysRemaining)} days
                   </Typography>
                   {daysRemaining < 0 && (
-                    <Typography variant="caption" color="error">
+                    <Typography variant='caption' color='error'>
                       Overdue
                     </Typography>
                   )}
@@ -343,10 +396,10 @@ export default function ProjectDetailPage() {
             {/* Description */}
             <Card sx={{ mb: 3 }}>
               <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
+                <Typography variant='h6' fontWeight={600} gutterBottom>
                   Description
                 </Typography>
-                <Typography variant="body1" color="text.secondary">
+                <Typography variant='body1' color='text.secondary'>
                   {project.description}
                 </Typography>
               </CardContent>
@@ -356,16 +409,16 @@ export default function ProjectDetailPage() {
             <Card>
               <CardContent>
                 <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
+                  display='flex'
+                  justifyContent='space-between'
+                  alignItems='center'
                   mb={2}
                 >
-                  <Typography variant="h6" fontWeight={600}>
+                  <Typography variant='h6' fontWeight={600}>
                     Tasks ({tasks.length})
                   </Typography>
                   <Button
-                    size="small"
+                    size='small'
                     startIcon={<Add />}
                     onClick={() => navigate(`/projects/${id}/tasks`)}
                   >
@@ -374,15 +427,15 @@ export default function ProjectDetailPage() {
                 </Box>
 
                 {tasks.length === 0 ? (
-                  <Box textAlign="center" py={4}>
+                  <Box textAlign='center' py={4}>
                     <Assignment
                       sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }}
                     />
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant='body2' color='text.secondary'>
                       No tasks yet
                     </Typography>
                     <Button
-                      size="small"
+                      size='small'
                       startIcon={<Add />}
                       onClick={() => navigate(`/projects/${id}/tasks`)}
                       sx={{ mt: 2 }}
@@ -400,11 +453,11 @@ export default function ProjectDetailPage() {
                       >
                         <ListItemText
                           primary={
-                            <Box display="flex" alignItems="center" gap={1}>
-                              <Typography variant="body1">
+                            <Box display='flex' alignItems='center' gap={1}>
+                              <Typography variant='body1'>
                                 {task.title}
                               </Typography>
-                              <StatusBadge status={task.status} size="small" />
+                              <StatusBadge status={task.status} size='small' />
                             </Box>
                           }
                           secondary={
@@ -418,7 +471,7 @@ export default function ProjectDetailPage() {
                     {tasks.length > 5 && (
                       <ListItem sx={{ px: 0, justifyContent: 'center' }}>
                         <Button
-                          size="small"
+                          size='small'
                           onClick={() => navigate(`/projects/${id}/tasks`)}
                         >
                           View all {tasks.length} tasks
@@ -433,69 +486,78 @@ export default function ProjectDetailPage() {
 
           {/* Sidebar */}
           <Grid size={{ xs: 12, md: 4 }}>
+            {/* Assign User Dialog */}
+            <Dialog open={open} onClose={handleClose}>
+              <DialogTitle>Assign Project Manager</DialogTitle>
+              <DialogContent>
+                {/* User assignment form goes here */}
+                <UserLookup
+                  Label='Project Manager'
+                  items={projectManagers}
+                  onSelect={(id) => setSelectedManagerId(id)}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleClose} disabled={actionLoading}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleAssignProjectManager(selectedManagerId)}
+                  disabled={actionLoading || !selectedManagerId}
+                  variant='contained'
+                >
+                  {actionLoading ? <CircularProgress size={24} /> : 'Assign'}
+                </Button>
+              </DialogActions>
+            </Dialog>
+
             {/* Project Manager */}
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                  <Typography variant="subtitle2" color="text.secondary">
+            {project.projectManager && (
+              <Card sx={{ mb: 3 }}>
+                <CardContent>
+                  <Typography
+                    variant='subtitle2'
+                    color='text.secondary'
+                    gutterBottom
+                  >
                     Project Manager
                   </Typography>
-                  <IconButton
-                    size="small"
-                    onClick={() => setAssignDialogOpen(true)}
-                    title={project.projectManager ? 'Reassign' : 'Assign'}
-                  >
-                    <PersonAdd fontSize="small" />
-                  </IconButton>
-                </Box>
-                
-                {project.projectManager ? (
-                  <Box display="flex" alignItems="center" gap={2}>
+                  <Box display='flex' alignItems='center' gap={2}>
                     <Avatar sx={{ width: 48, height: 48 }}>
-                      {project.projectManager.fullName?.[0] || '?'}
+                      {project.projectManager?.fullName?.[0] || '?'}
                     </Avatar>
                     <Box>
-                      <Typography variant="body1" fontWeight={600}>
-                        {project.projectManager.fullName}
+                      <Typography variant='body1' fontWeight={600}>
+                        {project.projectManager?.fullName || 'Unknown User'}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {project.projectManager.email}
+                      <Typography variant='caption' color='text.secondary'>
+                        {project.projectManager?.email}
                       </Typography>
                     </Box>
                   </Box>
-                ) : (
-                  <Box textAlign="center" py={2}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      No project manager assigned
-                    </Typography>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      startIcon={<PersonAdd />}
-                      onClick={() => setAssignDialogOpen(true)}
-                    >
-                      Assign Manager
-                    </Button>
-                  </Box>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Created By */}
             <Card sx={{ mb: 3 }}>
               <CardContent>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                <Typography
+                  variant='subtitle2'
+                  color='text.secondary'
+                  gutterBottom
+                >
                   Created By
                 </Typography>
-                <Box display="flex" alignItems="center" gap={2}>
+                <Box display='flex' alignItems='center' gap={2}>
                   <Avatar sx={{ width: 48, height: 48 }}>
                     {project.createdByUser?.fullName?.[0] || '?'}
                   </Avatar>
                   <Box>
-                    <Typography variant="body1" fontWeight={600}>
+                    <Typography variant='body1' fontWeight={600}>
                       {project.createdByUser?.fullName || 'Unknown User'}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant='caption' color='text.secondary'>
                       {project.createdByUser?.email}
                     </Typography>
                   </Box>
@@ -506,16 +568,20 @@ export default function ProjectDetailPage() {
             {/* Timeline */}
             <Card>
               <CardContent>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                <Typography
+                  variant='subtitle2'
+                  color='text.secondary'
+                  gutterBottom
+                >
                   Timeline
                 </Typography>
-                <Box display="flex" flexDirection="column" gap={2}>
+                <Box display='flex' flexDirection='column' gap={2}>
                   {project.startDate && (
                     <Box>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant='caption' color='text.secondary'>
                         Start Date
                       </Typography>
-                      <Typography variant="body2" fontWeight={600}>
+                      <Typography variant='body2' fontWeight={600}>
                         {format(new Date(project.startDate), 'MMM d, yyyy')}
                       </Typography>
                     </Box>
@@ -525,10 +591,10 @@ export default function ProjectDetailPage() {
                     <>
                       <Divider />
                       <Box>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant='caption' color='text.secondary'>
                           End Date
                         </Typography>
-                        <Typography variant="body2" fontWeight={600}>
+                        <Typography variant='body2' fontWeight={600}>
                           {format(new Date(project.endDate), 'MMM d, yyyy')}
                         </Typography>
                       </Box>
@@ -539,11 +605,14 @@ export default function ProjectDetailPage() {
                     <>
                       <Divider />
                       <Box>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant='caption' color='text.secondary'>
                           Actual Start
                         </Typography>
-                        <Typography variant="body2" fontWeight={600}>
-                          {format(new Date(project.actualStartDate), 'MMM d, yyyy')}
+                        <Typography variant='body2' fontWeight={600}>
+                          {format(
+                            new Date(project.actualStartDate),
+                            'MMM d, yyyy',
+                          )}
                         </Typography>
                       </Box>
                     </>
@@ -553,11 +622,14 @@ export default function ProjectDetailPage() {
                     <>
                       <Divider />
                       <Box>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant='caption' color='text.secondary'>
                           Actual End
                         </Typography>
-                        <Typography variant="body2" fontWeight={600}>
-                          {format(new Date(project.actualEndDate), 'MMM d, yyyy')}
+                        <Typography variant='body2' fontWeight={600}>
+                          {format(
+                            new Date(project.actualEndDate),
+                            'MMM d, yyyy',
+                          )}
                         </Typography>
                       </Box>
                     </>
@@ -567,10 +639,10 @@ export default function ProjectDetailPage() {
                     <>
                       <Divider />
                       <Box>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant='caption' color='text.secondary'>
                           Duration
                         </Typography>
-                        <Typography variant="body2" fontWeight={600}>
+                        <Typography variant='body2' fontWeight={600}>
                           {project.durationDays} days
                         </Typography>
                       </Box>
@@ -582,52 +654,37 @@ export default function ProjectDetailPage() {
           </Grid>
         </Grid>
 
-        {/* Assign PM Dialog */}
-        <AssignProjectManagerDialog
-          open={assignDialogOpen}
-          onClose={() => setAssignDialogOpen(false)}
-          projectId={id!}
-          currentManagerId={project.projectManagerUserId}
-          onSuccess={handleAssignSuccess}
-        />
-
         {/* Action Menu */}
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleActionClose}
         >
-          <MenuItem
-            onClick={() => {
-              handleActionClose();
-              setAssignDialogOpen(true);
-            }}
-          >
-            <PersonAdd fontSize="small" sx={{ mr: 1 }} />
-            {project.projectManager ? 'Reassign' : 'Assign'} Project Manager
-          </MenuItem>
-          
+          {project.status === 'Planning' && (
+            <MenuItem onClick={handleOpen}>
+              <Assignment sx={{ mr: 1 }} />
+              Assign Project Manager
+            </MenuItem>
+          )}
           {project.status === 'Planning' && (
             <MenuItem onClick={handleStart}>
-              <PlayArrow fontSize="small" sx={{ mr: 1 }} />
+              <PlayArrow fontSize='small' sx={{ mr: 1 }} />
               Start Project
             </MenuItem>
           )}
-          
           {project.status === 'Active' && [
-            <MenuItem key="complete" onClick={handleComplete}>
-              <CheckCircle fontSize="small" sx={{ mr: 1 }} />
+            <MenuItem key='complete' onClick={handleComplete}>
+              <CheckCircle fontSize='small' sx={{ mr: 1 }} />
               Complete
             </MenuItem>,
-            <MenuItem key="hold" onClick={handleHold}>
-              <Pause fontSize="small" sx={{ mr: 1 }} />
+            <MenuItem key='hold' onClick={handleHold}>
+              <Pause fontSize='small' sx={{ mr: 1 }} />
               Put on Hold
             </MenuItem>,
           ]}
-          
           {!['Completed', 'Cancelled'].includes(project.status) && (
             <MenuItem onClick={handleCancel}>
-              <CancelIcon fontSize="small" sx={{ mr: 1 }} />
+              <CancelIcon fontSize='small' sx={{ mr: 1 }} />
               Cancel Project
             </MenuItem>
           )}

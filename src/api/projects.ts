@@ -50,7 +50,7 @@ export const projectApi = {
     managerId: string,
   ): Promise<void> => {
     await apiClient.post(`/projects/${projectId}/assign-pm`, {
-      managerId,
+      projectManagerUserId: managerId,
     });
   },
 
