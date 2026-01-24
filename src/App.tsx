@@ -27,25 +27,30 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <BrowserRouter>
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <Routes>
             {/* Public Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path='/login' element={<LoginPage />} />
+            <Route path='/forgot-password' element={<ForgotPasswordPage />} />
+            <Route path='/reset-password' element={<ResetPasswordPage />} />
 
             {/* Protected Routes */}
             <Route
-              path="/"
+              path='/'
               element={
                 <ProtectedRoute>
-                  <Navigate to="/dashboard" replace />
+                  <Navigate to='/dashboard' replace />
                 </ProtectedRoute>
               }
             />
-            
+
             <Route
-              path="/dashboard"
+              path='/dashboard'
               element={
                 <ProtectedRoute>
                   <DashboardPage />
@@ -55,16 +60,16 @@ function App() {
 
             {/* Project Requests */}
             <Route
-              path="/project-requests"
+              path='/project-requests'
               element={
                 <ProtectedRoute>
                   <ProjectRequestsPage />
                 </ProtectedRoute>
               }
             />
-            
+
             <Route
-              path="/project-requests/:id"
+              path='/project-requests/:id'
               element={
                 <ProtectedRoute>
                   <ProjectRequestDetailPage />
@@ -74,16 +79,16 @@ function App() {
 
             {/* Projects */}
             <Route
-              path="/projects"
+              path='/projects'
               element={
                 <ProtectedRoute>
                   <ProjectsPage />
                 </ProtectedRoute>
               }
             />
-            
+
             <Route
-              path="/projects/:id"
+              path='/projects/:id'
               element={
                 <ProtectedRoute>
                   <ProjectDetailPage />
@@ -92,7 +97,7 @@ function App() {
             />
 
             <Route
-              path="/project-requests/:id/edit"
+              path='/project-requests/:id/edit'
               element={
                 <ProtectedRoute>
                   <EditProjectRequestPage />
@@ -102,16 +107,16 @@ function App() {
 
             {/* Tasks */}
             <Route
-              path="/projects/:id/tasks"
+              path='/projects/:id/tasks'
               element={
                 <ProtectedRoute>
                   <TasksPage />
                 </ProtectedRoute>
               }
             />
-            
+
             <Route
-              path="/projects/:id/tasks/:taskId"
+              path='/projects/:id/tasks/:taskId'
               element={
                 <ProtectedRoute>
                   <TaskDetailPage />
@@ -121,7 +126,7 @@ function App() {
 
             {/* Change Requests */}
             <Route
-              path="/change-requests"
+              path='/change-requests'
               element={
                 <ProtectedRoute>
                   <ChangeRequestsPage />
@@ -130,7 +135,7 @@ function App() {
             />
 
             <Route
-              path="/change-requests/:id"
+              path='/change-requests/:id'
               element={
                 <ProtectedRoute>
                   <ChangeRequestDetailPage />
@@ -139,7 +144,7 @@ function App() {
             />
 
             <Route
-              path="/change-requests/create"
+              path='/change-requests/create'
               element={
                 <ProtectedRoute>
                   <CreateChangeRequestPage />
@@ -148,7 +153,7 @@ function App() {
             />
 
             <Route
-              path="/change-analytics"
+              path='/change-analytics'
               element={
                 <ProtectedRoute>
                   <ChangeAnalyticsPage />
@@ -157,7 +162,7 @@ function App() {
             />
 
             <Route
-              path="/change-requests/:id/edit"
+              path='/change-requests/:id/edit'
               element={
                 <ProtectedRoute>
                   <ChangeRequestEditPage />
@@ -166,7 +171,7 @@ function App() {
             />
 
             {/* 404 */}
-            <Route path="*" element={<NotFoundPage />} />
+            <Route path='*' element={<NotFoundPage />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
