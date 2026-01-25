@@ -17,14 +17,24 @@ import {
   CircularProgress,
   Alert,
   Divider,
-  Avatar
+  Avatar,
 } from '@mui/material';
-import { Add, PlayArrow, CheckCircle, Block, DetailsRounded } from '@mui/icons-material';
+import {
+  Add,
+  PlayArrow,
+  CheckCircle,
+  Block,
+  DetailsRounded,
+} from '@mui/icons-material';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { taskApi } from '@/api/tasks';
 import { getErrorMessage } from '@/api/client';
-import type { Task, CreateTaskRequest, UpdateTaskRequest } from '@/types/project';
+import type {
+  Task,
+  CreateTaskRequest,
+  UpdateTaskRequest,
+} from '@/types/project';
 import { SideDrawer } from '@/components/common/SideDrawer';
 
 import { format } from 'date-fns';
@@ -36,7 +46,7 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
-  
+
   // Create Dialog
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -50,7 +60,6 @@ export default function TasksPage() {
     description: '',
     status: 'NotStarted',
     priority: 'Medium',
-
   });
 
   useEffect(() => {
@@ -129,7 +138,12 @@ export default function TasksPage() {
   if (loading || createLoading) {
     return (
       <AppLayout>
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+        <Box
+          display='flex'
+          justifyContent='center'
+          alignItems='center'
+          minHeight='60vh'
+        >
           <CircularProgress />
         </Box>
       </AppLayout>
@@ -140,180 +154,209 @@ export default function TasksPage() {
     <>
       <title>Tasks - APEX</title>
       <AppLayout>
-
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Box>
-          <Typography variant="h4" fontWeight={700} gutterBottom>
-            Project Tasks
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {tasks.length} tasks total
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => setCreateDialogOpen(true)}
+        <Box
+          display='flex'
+          justifyContent='space-between'
+          alignItems='center'
+          mb={3}
         >
-          New Task
-        </Button>
-      </Box>
-
-      {error && (
-        <Alert severity="error" onClose={() => setError('')} sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
-
-      {/* Kanban Board */}
-      <Grid container spacing={2}>
-        {/* Not Started */}
-        <Grid  size={{ xs: 12, md: 3 }}>
-          <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
-            <Typography variant="subtitle2" fontWeight={600} mb={2}>
-              Not Started ({groupedTasks.notStarted.length})
+          <Box>
+            <Typography variant='h4' fontWeight={700} gutterBottom>
+              Project Tasks
             </Typography>
-            {groupedTasks.notStarted.map((task) => (
-              <Card key={task.id} sx={{ mb: 2 }}>
-                <CardContent>
-                  <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-                    {task.title}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {task.description}
-                  </Typography>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mt:1, mb:1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Avatar sx={{ width: 32, height: 32 }}>
-                        {task.createdByUser?.fullName?.[0] || '?'}
-                      </Avatar>
-                      <Box>
-                        <Typography variant="body2" fontWeight={600}>
-                          {task.createdByUser?.fullName || 'Unknown User'}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {task.createdByUser?.email}
-                        </Typography>
+            <Typography variant='body2' color='text.secondary'>
+              {tasks.length} tasks total
+            </Typography>
+          </Box>
+          <Button
+            variant='contained'
+            startIcon={<Add />}
+            onClick={() => setCreateDialogOpen(true)}
+          >
+            New Task
+          </Button>
+        </Box>
+
+        {error && (
+          <Alert severity='error' onClose={() => setError('')} sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
+
+        {/* Kanban Board */}
+        <Grid container spacing={2}>
+          {/* Not Started */}
+          <Grid size={{ xs: 12, md: 3 }}>
+            <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
+              <Typography variant='subtitle2' fontWeight={600} mb={2}>
+                Not Started ({groupedTasks.notStarted.length})
+              </Typography>
+              {groupedTasks.notStarted.map((task) => (
+                <Card key={task.id} sx={{ mb: 2 }}>
+                  <CardContent>
+                    <Typography
+                      variant='subtitle2'
+                      fontWeight={600}
+                      gutterBottom
+                    >
+                      {task.title}
+                    </Typography>
+                    <Typography variant='caption' color='text.secondary'>
+                      {task.description}
+                    </Typography>
+                    <Box
+                      display='flex'
+                      justifyContent='space-between'
+                      alignItems='center'
+                      sx={{ mt: 1, mb: 1 }}
+                    >
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                      >
+                        <Avatar sx={{ width: 32, height: 32 }}>
+                          {task.createdByUser?.fullName?.[0] || '?'}
+                        </Avatar>
+                        <Box>
+                          <Typography variant='body2' fontWeight={600}>
+                            {task.createdByUser?.fullName || 'Unknown User'}
+                          </Typography>
+                          <Typography variant='caption' color='text.secondary'>
+                            {task.createdByUser?.email}
+                          </Typography>
                         </Box>
                       </Box>
-                    <Typography variant="caption" color="text.secondary">
-                      {format(new Date(task.createdDate), 'MMM d, yyyy')}
-                    </Typography>
-                  </Box>
-                  <Box mt={1}>
-                    <Chip label={task.priority} size="small" />
-                  </Box>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center', // Optional: Aligns items vertically in the center
-                      width: '100%', // Optional: Ensures the box takes full width to show spacing effect
-                      border: 'none', // Optional: for visualization
-                      padding: '10px'
-                    }}
-                  >
-                    <Button
-                        size="small"
+                      <Typography variant='caption' color='text.secondary'>
+                        {format(new Date(task.createdDate), 'MMM d, yyyy')}
+                      </Typography>
+                    </Box>
+                    <Box mt={1}>
+                      <Chip label={task.priority} size='small' />
+                    </Box>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center', // Optional: Aligns items vertically in the center
+                        width: '100%', // Optional: Ensures the box takes full width to show spacing effect
+                        border: 'none', // Optional: for visualization
+                        padding: '10px',
+                      }}
+                    >
+                      <Button
+                        size='small'
                         startIcon={<PlayArrow />}
                         onClick={() => handleStart(task.id)}
                         sx={{ mt: 1 }}
                       >
                         Start
                       </Button>
-                      <Button
+                      {/* <Button
                         size="small"
                         startIcon={<DetailsRounded />}
                         onClick={() => handleDetails(task.id)}
                         sx={{ mt: 1, ml: 1 }}
                       >
                       Details
-                      </Button>
+                      </Button> */}
                     </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        </Grid>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          </Grid>
 
-        {/* In Progress */}
-        <Grid  size={{ xs: 12, md: 3 }}>
-          <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
-            <Typography variant="subtitle2" fontWeight={600} mb={2}>
-              In Progress ({groupedTasks.inProgress.length})
-            </Typography>
-            {groupedTasks.inProgress.map((task) => (
-              <Card key={task.id} sx={{ mb: 2 }}>
-                <CardContent>
-                  <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-                    {task.title}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {task.assignedToUser?.fullName || 'Unassigned'}
-                  </Typography>
-                  <Box mt={1}>
-                    <Typography variant="caption">
-                      {task.actualHours}h logged
+          {/* In Progress */}
+          <Grid size={{ xs: 12, md: 3 }}>
+            <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
+              <Typography variant='subtitle2' fontWeight={600} mb={2}>
+                In Progress ({groupedTasks.inProgress.length})
+              </Typography>
+              {groupedTasks.inProgress.map((task) => (
+                <Card key={task.id} sx={{ mb: 2 }}>
+                  <CardContent>
+                    <Typography
+                      variant='subtitle2'
+                      fontWeight={600}
+                      gutterBottom
+                    >
+                      {task.title}
                     </Typography>
-                  </Box>
-                  <Button
-                    size="small"
-                    startIcon={<CheckCircle />}
-                    onClick={() => handleComplete(task.id)}
-                    sx={{ mt: 1 }}
-                  >
-                    Complete
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
+                    <Typography variant='caption' color='text.secondary'>
+                      {task.assignedToUser?.fullName || 'Unassigned'}
+                    </Typography>
+                    <Box mt={1}>
+                      <Typography variant='caption'>
+                        {task.actualHours}h logged
+                      </Typography>
+                    </Box>
+                    <Button
+                      size='small'
+                      startIcon={<CheckCircle />}
+                      onClick={() => handleComplete(task.id)}
+                      sx={{ mt: 1 }}
+                    >
+                      Complete
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          </Grid>
+
+          {/* Blocked */}
+          <Grid size={{ xs: 12, md: 3 }}>
+            <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
+              <Typography variant='subtitle2' fontWeight={600} mb={2}>
+                Blocked ({groupedTasks.blocked.length})
+              </Typography>
+              {groupedTasks.blocked.map((task) => (
+                <Card key={task.id} sx={{ mb: 2 }}>
+                  <CardContent>
+                    <Typography
+                      variant='subtitle2'
+                      fontWeight={600}
+                      gutterBottom
+                    >
+                      {task.title}
+                    </Typography>
+                    <Alert severity='error' sx={{ mt: 1 }}>
+                      <Typography variant='caption'>
+                        {task.blockedReason}
+                      </Typography>
+                    </Alert>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          </Grid>
+
+          {/* Completed */}
+          <Grid size={{ xs: 12, md: 3 }}>
+            <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
+              <Typography variant='subtitle2' fontWeight={600} mb={2}>
+                Completed ({groupedTasks.completed.length})
+              </Typography>
+              {groupedTasks.completed.map((task) => (
+                <Card key={task.id} sx={{ mb: 2 }}>
+                  <CardContent>
+                    <Typography
+                      variant='subtitle2'
+                      fontWeight={600}
+                      gutterBottom
+                    >
+                      {task.title}
+                    </Typography>
+                    <Typography variant='caption' color='text.secondary'>
+                      {task.actualHours}h total
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          </Grid>
         </Grid>
 
-        {/* Blocked */}
-        <Grid  size={{ xs: 12, md: 3 }}>
-          <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
-            <Typography variant="subtitle2" fontWeight={600} mb={2}>
-              Blocked ({groupedTasks.blocked.length})
-            </Typography>
-            {groupedTasks.blocked.map((task) => (
-              <Card key={task.id} sx={{ mb: 2 }}>
-                <CardContent>
-                  <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-                    {task.title}
-                  </Typography>
-                  <Alert severity="error" sx={{ mt: 1 }}>
-                    <Typography variant="caption">{task.blockedReason}</Typography>
-                  </Alert>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        </Grid>
-
-        {/* Completed */}
-        <Grid  size={{ xs: 12, md: 3 }}>
-          <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
-            <Typography variant="subtitle2" fontWeight={600} mb={2}>
-              Completed ({groupedTasks.completed.length})
-            </Typography>
-            {groupedTasks.completed.map((task) => (
-              <Card key={task.id} sx={{ mb: 2 }}>
-                <CardContent>
-                  <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-                    {task.title}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {task.actualHours}h total
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        </Grid>
-      </Grid>
-        
-        <SideDrawer open={sideDrawerOpen} onClose={() => setSideDrawerOpen(false)}>
+        {/* <SideDrawer open={sideDrawerOpen} onClose={() => setSideDrawerOpen(false)}>
           <Box>
             <Typography variant="h4" fontWeight={600} gutterBottom>
               Task Details
@@ -404,52 +447,66 @@ export default function TasksPage() {
               </Grid>
             </Grid>
           </Box>
-        </SideDrawer>
+        </SideDrawer> */}
 
-
-      {/* Create Task Dialog */}
-      <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Create Task</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Title"
-            fullWidth
-            required
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            sx={{ mt: 2, mb: 2 }}
-          />
-          <TextField
-            label="Description"
-            fullWidth
-            required
-            multiline
-            rows={3}
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Priority"
-            select
-            fullWidth
-            value={formData.priority}
-            onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-          >
-            <MenuItem value="Low">Low</MenuItem>
-            <MenuItem value="Medium">Medium</MenuItem>
-            <MenuItem value="High">High</MenuItem>
-            <MenuItem value="Urgent">Urgent</MenuItem>
-          </TextField>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreate} disabled={!formData.title}>
-            Create
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </AppLayout>
+        {/* Create Task Dialog */}
+        <Dialog
+          open={createDialogOpen}
+          onClose={() => setCreateDialogOpen(false)}
+          maxWidth='sm'
+          fullWidth
+        >
+          <DialogTitle>Create Task</DialogTitle>
+          <DialogContent>
+            <TextField
+              label='Title'
+              fullWidth
+              required
+              value={formData.title}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
+              sx={{ mt: 2, mb: 2 }}
+            />
+            <TextField
+              label='Description'
+              fullWidth
+              required
+              multiline
+              rows={3}
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              label='Priority'
+              select
+              fullWidth
+              value={formData.priority}
+              onChange={(e) =>
+                setFormData({ ...formData, priority: e.target.value })
+              }
+            >
+              <MenuItem value='Low'>Low</MenuItem>
+              <MenuItem value='Medium'>Medium</MenuItem>
+              <MenuItem value='High'>High</MenuItem>
+              <MenuItem value='Urgent'>Urgent</MenuItem>
+            </TextField>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+            <Button
+              variant='contained'
+              onClick={handleCreate}
+              disabled={!formData.title}
+            >
+              Create
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </AppLayout>
     </>
   );
 }
