@@ -22,6 +22,8 @@ import ChangeAnalyticsPage from '@/pages/ChangeAnalytics';
 
 import NotFoundPage from '@/pages/NotFound';
 import EditProjectRequestPage from './pages/EditProjectRequest';
+import UserManagement from './pages/admin/UserManagement';
+import UserProfile from './pages/UserProfile';
 
 function App() {
   return (
@@ -38,7 +40,6 @@ function App() {
             <Route path='/login' element={<LoginPage />} />
             <Route path='/forgot-password' element={<ForgotPasswordPage />} />
             <Route path='/reset-password' element={<ResetPasswordPage />} />
-
             {/* Protected Routes */}
             <Route
               path='/'
@@ -48,7 +49,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path='/dashboard'
               element={
@@ -57,7 +57,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             {/* Project Requests */}
             <Route
               path='/project-requests'
@@ -67,7 +66,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path='/project-requests/:id'
               element={
@@ -76,7 +74,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             {/* Projects */}
             <Route
               path='/projects'
@@ -86,7 +83,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path='/projects/:id'
               element={
@@ -95,7 +91,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path='/project-requests/:id/edit'
               element={
@@ -104,7 +99,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             {/* Tasks */}
             <Route
               path='/projects/:id/tasks'
@@ -114,7 +108,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path='/projects/:id/tasks/:taskId'
               element={
@@ -123,7 +116,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             {/* Change Requests */}
             <Route
               path='/change-requests'
@@ -133,7 +125,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path='/change-requests/:id'
               element={
@@ -142,7 +133,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path='/change-requests/create'
               element={
@@ -151,7 +141,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path='/change-analytics'
               element={
@@ -160,7 +149,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path='/change-requests/:id/edit'
               element={
@@ -169,7 +157,24 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
+            // User Profile (all users)
+            <Route
+              path='/profile'
+              element={
+                <ProtectedRoute>
+                  <UserProfile />
+                </ProtectedRoute>
+              }
+            />
+            // Admin User Management (TenantAdmin only)
+            <Route
+              path='/admin/users'
+              element={
+                <ProtectedRoute>
+                  <UserManagement />
+                </ProtectedRoute>
+              }
+            />
             {/* 404 */}
             <Route path='*' element={<NotFoundPage />} />
           </Routes>

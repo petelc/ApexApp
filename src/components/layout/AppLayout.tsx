@@ -34,7 +34,9 @@ import {
   ChevronLeft,
   LightMode,
   DarkMode,
-  ChecklistRtl
+  ChecklistRtl,
+  AdminPanelSettings,
+  Person,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -57,6 +59,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const { user, logout } = useAuth();
   const { mode, toggleTheme } = useThemeMode();
 
+  // Check if user is TenantAdmin
+  const isTenantAdmin = user?.roles?.includes('TenantAdmin') || false;
+
   const handleDrawerToggle = () => {
     if (isMobile) {
       setMobileOpen(!mobileOpen);
@@ -73,6 +78,11 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     setAnchorEl(null);
   };
 
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    handleProfileMenuClose();
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -82,7 +92,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
     { text: 'Project Requests', icon: <Assignment />, path: '/project-requests' },
     { text: 'Projects', icon: <FolderOpen />, path: '/projects' },
-    { text: 'Change Requests', icon: <ChecklistRtl />, path: '/change-requests' }
+    { text: 'Change Requests', icon: <ChecklistRtl />, path: '/change-requests' },
   ];
 
   const drawer = (
@@ -97,15 +107,21 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         }}
       >
         <Box
-          component="img"
-          src="/apex-logo.svg"
-          alt="APEX Logo"
           sx={{
             width: 40,
             height: 40,
             borderRadius: 2,
+            background: 'linear-gradient(135deg, #4A90E2 0%, #2E5090 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 900,
+            fontSize: '1.25rem',
+            color: 'white',
           }}
-        />
+        >
+          <img src="/apex_icon.svg" alt="APEX" style={{ width: '100%', height: '100%' }} />
+        </Box>
         {(sidebarOpen || isMobile) && (
           <Typography variant="h5" fontWeight={900} color="primary">
             APEX
@@ -380,12 +396,25 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           </Typography>
         </Box>
         <Divider />
-        <MenuItem onClick={handleProfileMenuClose}>
+        
+        {/* My Profile */}
+        <MenuItem onClick={() => handleNavigate('/profile')}>
           <ListItemIcon>
-            <AccountCircle fontSize="small" />
+            <Person fontSize="small" />
           </ListItemIcon>
-          Profile
+          My Profile
         </MenuItem>
+
+        {/* Admin User Management (only for TenantAdmin) */}
+        {isTenantAdmin && (
+          <MenuItem onClick={() => handleNavigate('/admin/users')}>
+            <ListItemIcon>
+              <AdminPanelSettings fontSize="small" />
+            </ListItemIcon>
+            User Management
+          </MenuItem>
+        )}
+
         <MenuItem onClick={handleProfileMenuClose}>
           <ListItemIcon>
             <Settings fontSize="small" />
