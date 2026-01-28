@@ -47,71 +47,15 @@ export interface Project {
 }
 
 /**
- * Task Types
+ * Task Types - Re-exported from task.ts
  */
-
-export type TaskStatus =
-  | 'NotStarted'
-  | 'InProgress'
-  | 'Blocked'
-  | 'Completed'
-  | 'Cancelled';
-
-export interface Task {
-  id: string;
-  projectId: string;
-  title: string;
-  description: string;
-  status: TaskStatus;
-  priority: string;
-  assignedToUserId?: string;
-  assignedToUser?: {
-    id: string;
-    fullName: string;
-    email: string;
-  };
-  // assignedToName?: string;
-  assignedToDepartmentId?: string;
-  assignedToDepartmentName?: string;
-  createdByUserId: string;
-  createdByUser?: {
-    id: string;
-    fullName: string;
-    email: string;
-  };
-  estimatedHours?: number;
-  actualHours: number;
-  dueDate?: string;
-  startedDate?: string;
-  completedDate?: string;
-  blockedReason?: string;
-  blockedDate?: string;
-  createdDate: string;
-  lastModifiedDate?: string;
-}
-
-export interface CreateTaskRequest {
-  title: string;
-  description: string;
-  priority: string;
-  estimatedHours?: number;
-  dueDate?: string;
-}
-
-export interface UpdateTaskRequest {
-  title?: string;
-  description?: string;
-  status?: string;
-  priority?: string;
-  assignedToUserId?: string;
-  assignedToDepartmentId?: string;
-  estimatedHours?: number;
-  createdDate?: string;
-  startedDate?: string;
-  completedDate?: string;
-  dueDate?: string;
-  blockedReason?: string;
-}
+export type {
+  Task,
+  TaskStatus,
+  TaskPriority,
+  CreateTaskRequest,
+  UpdateTaskRequest,
+} from './task';
 
 /**
  * Department Types

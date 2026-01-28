@@ -35,7 +35,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { AssignProjectManagerDialog } from '@/components/project/AssignProjectManagerDialog';
 import { projectApi } from '@/api/projects';
-import { taskApi } from '@/api/tasks';
+import tasksApi from '@/api/tasks';
 import { getErrorMessage } from '@/api/client';
 import type { Project, Task } from '@/types/project';
 import { format, differenceInDays } from 'date-fns';
@@ -81,7 +81,8 @@ export default function ProjectDetailPage() {
     if (!id) return;
 
     try {
-      const data = await taskApi.getByProject(id);
+      const data = await tasksApi.getProjectTasks(id);
+      console.log('Tasks API response:', data); // ← Add this to debug
       setTasks(data);
     } catch (err) {
       console.error('Error loading tasks:', err);
@@ -168,9 +169,17 @@ export default function ProjectDetailPage() {
   };
 
   const calculateProgress = () => {
-    if (tasks.length === 0) return 0;
-    const completed = tasks.filter((t) => t.status === 'Completed').length;
-    return Math.round((completed / tasks.length) * 100);
+    // ✅ Add safety check
+    if (!tasks || !Array.isArray(tasks)) {
+      return { completed: 0, total: 0, percentage: 0 };
+    }
+
+    const completedTasks = tasks.filter((t) => t.status === 'Completed').length;
+    const totalTasks = tasks.length;
+    const percentage =
+      totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    return { completed: completedTasks, total: totalTasks, percentage };
   };
 
   const getDaysRemaining = () => {
@@ -273,7 +282,7 @@ export default function ProjectDetailPage() {
                 </Typography>
                 <Box display='flex' alignItems='baseline' gap={1}>
                   <Typography variant='h4' fontWeight={700}>
-                    {progress}%
+                    {progress.percentage}%
                   </Typography>
                   <Typography variant='body2' color='text.secondary'>
                     complete
@@ -281,21 +290,20 @@ export default function ProjectDetailPage() {
                 </Box>
                 <LinearProgress
                   variant='determinate'
-                  value={progress}
+                  value={progress.percentage}
                   sx={{ mt: 1, height: 8, borderRadius: 4 }}
                 />
               </Grid>
-
               <Grid size={{ xs: 12, md: 3 }}>
                 <Typography variant='subtitle2' color='text.secondary'>
                   Tasks
                 </Typography>
                 <Box display='flex' alignItems='baseline' gap={1}>
                   <Typography variant='h4' fontWeight={700}>
-                    {tasks.filter((t) => t.status === 'Completed').length}
+                    {progress.completed}
                   </Typography>
                   <Typography variant='body2' color='text.secondary'>
-                    / {tasks.length}
+                    / {progress.total}
                   </Typography>
                 </Box>
                 <Typography variant='caption' color='text.secondary'>

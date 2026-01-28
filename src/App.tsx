@@ -24,6 +24,7 @@ import NotFoundPage from '@/pages/NotFound';
 import EditProjectRequestPage from './pages/EditProjectRequest';
 import UserManagement from './pages/admin/UserManagement';
 import UserProfile from './pages/UserProfile';
+import TaskDetail from '@/pages/TaskDetail';
 
 function App() {
   return (
