@@ -4,69 +4,71 @@ import { apiClient } from './client';
  * User types
  */
 export interface User {
-  id: string;
+  userId: string;
   email: string;
-  userName: string;
-  fullName: string;
   firstName: string;
   lastName: string;
-  phoneNumber?: string;
-  timeZone?: string;
-  profileImageUrl?: string;
-  isActive: boolean;
-  tenantId: string;
+  fullName?: string; // Computed full name
   departmentId?: string;
-  lastLoginDate?: string;
-  createdDate: string;
-  lastModifiedDate?: string;
-  roles: string[];
-}
-
-export interface UpdateProfileRequest {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phoneNumber?: string;
-  timeZone?: string;
-}
-
-export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-  confirmNewPassword: string;
-}
-
-export interface UpdateUserRequest {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phoneNumber?: string;
-  timeZone?: string;
-  isActive?: boolean;
-}
-
-export interface CreateUserRequest {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber?: string;
-  timeZone?: string;
-  password: string;
-  confirmPassword: string;
-  isActive?: boolean;
+  departmentName?: string;
   roles?: string[];
-}
-
-export interface AssignRoleRequest {
-  roleName: string;
+  isActive: boolean;
+  createdAt: string;
+  createdDate?: string; // Alias for createdAt
+  lastLoginDate?: string;
+  profileImageUrl?: string;
 }
 
 /**
- * Users API
+ * User Summary - Lightweight user information for display
+ * ✅ Defined here to avoid circular imports
  */
-export const usersApi = {
+export interface UserSummary {
+  userId: string;
+  fullName: string;
+  email: string;
+}
+
+export interface CreateUserRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  departmentId?: string;
+}
+
+export interface UpdateUserRequest {
+  firstName: string;
+  lastName: string;
+  isActive: boolean;
+}
+
+export interface AssignDepartmentRequest {
+  departmentId?: string | null; // null to remove department assignment
+}
+
+/**
+ * User API
+ */
+export const userApi = {
   /**
-   * Get current user profile
+   * Get all users
+   */
+  getAll: async (): Promise<User[]> => {
+    const response = await apiClient.get<User[]>('/users');
+    return response.data;
+  },
+
+  /**
+   * Get user by ID
+   */
+  getById: async (userId: string): Promise<User> => {
+    const response = await apiClient.get<User>(`/users/${userId}`);
+    return response.data;
+  },
+
+  /**
+   * Get current logged-in user
    */
   getCurrentUser: async (): Promise<User> => {
     const response = await apiClient.get<User>('/users/me');
@@ -74,109 +76,115 @@ export const usersApi = {
   },
 
   /**
-   * Update current user profile
+   * Get users by role
    */
-  updateCurrentUser: async (data: UpdateProfileRequest): Promise<User> => {
-    const response = await apiClient.put<User>('/users/me', data);
-    return response.data;
-  },
-
-  /**
-   * Change password
-   */
-  changePassword: async (data: ChangePasswordRequest): Promise<void> => {
-    await apiClient.post('/users/me/change-password', data);
-  },
-
-  /**
-   * Upload profile picture
-   */
-  uploadProfilePicture: async (
-    file: File,
-  ): Promise<{ profileImageUrl: string }> => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await apiClient.post<{ profileImageUrl: string }>(
-      '/users/me/profile-picture',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      },
+  getUsersByRole: async (role: string): Promise<UserSummary[]> => {
+    const response = await apiClient.get<UserSummary[]>(
+      `/users/by-role/${role}`,
     );
     return response.data;
   },
 
   /**
-   * Get users by role
+   * Get all project managers
    */
-  getUsersByRole: async (role: string): Promise<User[]> => {
-    const response = await apiClient.get<User[]>(`/users/by-role/${role}`);
+  getProjectManagers: async (): Promise<UserSummary[]> => {
+    return userApi.getUsersByRole('Project Manager');
+  },
+
+  /**
+   * Get all change managers
+   */
+  getChangeManagers: async (): Promise<UserSummary[]> => {
+    return userApi.getUsersByRole('Change Manager');
+  },
+
+  /**
+   * Get all CAB members
+   */
+  getCABMembers: async (): Promise<UserSummary[]> => {
+    return userApi.getUsersByRole('CAB Member');
+  },
+
+  /**
+   * Get all CAB managers
+   */
+  getCABManagers: async (): Promise<UserSummary[]> => {
+    return userApi.getUsersByRole('CAB Manager');
+  },
+
+  /**
+   * Create new user
+   */
+  create: async (data: CreateUserRequest): Promise<{ userId: string }> => {
+    const response = await apiClient.post('/users', data);
     return response.data;
   },
 
-  // Admin operations
+  /**
+   * Update user
+   */
+  update: async (id: string, data: UpdateUserRequest): Promise<void> => {
+    await apiClient.put(`/users/${id}`, data);
+  },
+
+  /**
+   * Assign user to department (or remove assignment if departmentId is null)
+   */
+  assignDepartment: async (
+    userId: string,
+    departmentId: string | null,
+  ): Promise<void> => {
+    await apiClient.post(`/users/${userId}/assign-department`, {
+      departmentId,
+    });
+  },
+
+  /**
+   * Get users by role
+   */
+  getByRole: async (role: string): Promise<User[]> => {
+    const response = await apiClient.get<User[]>(`/users/role/${role}`);
+    return response.data;
+  },
+
+  /**
+   * Get users by department
+   */
+  getByDepartment: async (departmentId: string): Promise<User[]> => {
+    const response = await apiClient.get<User[]>(
+      `/departments/${departmentId}/users`,
+    );
+    return response.data;
+  },
+
+  /**
+   * Admin operations
+   */
   admin: {
     /**
-     * Get all users (admin)
-     */
-    getAllUsers: async (): Promise<User[]> => {
-      const response = await apiClient.get<User[]>('/admin/users');
-      return response.data;
-    },
-
-    /**
-     * Get user by ID (admin)
-     */
-    getUserById: async (userId: string): Promise<User> => {
-      const response = await apiClient.get<User>(`/admin/users/${userId}`);
-      return response.data;
-    },
-
-    /**
-     * Create new user (admin)
-     */
-    createUser: async (data: CreateUserRequest): Promise<User> => {
-      const response = await apiClient.post<User>('/admin/users', data);
-      return response.data;
-    },
-
-    /**
-     * Update user (admin)
-     */
-    updateUser: async (
-      userId: string,
-      data: UpdateUserRequest,
-    ): Promise<User> => {
-      const response = await apiClient.put<User>(
-        `/admin/users/${userId}`,
-        data,
-      );
-      return response.data;
-    },
-
-    /**
-     * Assign role to user (admin)
-     */
-    assignRole: async (userId: string, roleName: string): Promise<void> => {
-      await apiClient.post(`/admin/users/${userId}/roles`, { roleName });
-    },
-
-    /**
-     * Remove role from user (admin)
-     */
-    removeRole: async (userId: string, roleName: string): Promise<void> => {
-      await apiClient.delete(`/admin/users/${userId}/roles/${roleName}`);
-    },
-
-    /**
-     * Get all roles (admin)
+     * Get all available roles
      */
     getAllRoles: async (): Promise<string[]> => {
       const response = await apiClient.get<string[]>('/admin/roles');
       return response.data;
     },
+
+    /**
+     * Assign role to user
+     */
+    assignRole: async (userId: string, role: string): Promise<void> => {
+      await apiClient.post(`/admin/users/${userId}/roles`, { role });
+    },
+
+    /**
+     * Remove role from user
+     */
+    removeRole: async (userId: string, role: string): Promise<void> => {
+      await apiClient.delete(`/admin/users/${userId}/roles/${role}`);
+    },
   },
 };
+
+// Export alias for backward compatibility
+export { userApi as usersApi };

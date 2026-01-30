@@ -30,7 +30,6 @@ import {
   Search,
   Logout,
   Settings,
-  AccountCircle,
   ChevronLeft,
   LightMode,
   DarkMode,
@@ -90,9 +89,17 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
   const menuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    { text: 'Project Requests', icon: <Assignment />, path: '/project-requests' },
+    {
+      text: 'Project Requests',
+      icon: <Assignment />,
+      path: '/project-requests',
+    },
     { text: 'Projects', icon: <FolderOpen />, path: '/projects' },
-    { text: 'Change Requests', icon: <ChecklistRtl />, path: '/change-requests' },
+    {
+      text: 'Change Requests',
+      icon: <ChecklistRtl />,
+      path: '/change-requests',
+    },
   ];
 
   const drawer = (
@@ -120,10 +127,14 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             color: 'white',
           }}
         >
-          <img src="/apex_icon.svg" alt="APEX" style={{ width: '100%', height: '100%' }} />
+          <img
+            src='/apex_icon.svg'
+            alt='APEX'
+            style={{ width: '100%', height: '100%' }}
+          />
         </Box>
         {(sidebarOpen || isMobile) && (
-          <Typography variant="h5" fontWeight={900} color="primary">
+          <Typography variant='h5' fontWeight={900} color='primary'>
             APEX
           </Typography>
         )}
@@ -152,7 +163,10 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
                   minWidth: 0,
                   mr: sidebarOpen || isMobile ? 2 : 'auto',
                   justifyContent: 'center',
-                  color: location.pathname === item.path ? 'primary.main' : 'inherit',
+                  color:
+                    location.pathname === item.path
+                      ? 'primary.main'
+                      : 'inherit',
                 }}
               >
                 {item.icon}
@@ -202,10 +216,10 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           </Avatar>
           {(sidebarOpen || isMobile) && (
             <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-              <Typography variant="body2" fontWeight={600} noWrap>
+              <Typography variant='body2' fontWeight={600} noWrap>
                 {user?.firstName} {user?.lastName}
               </Typography>
-              <Typography variant="caption" color="text.secondary" noWrap>
+              <Typography variant='caption' color='text.secondary' noWrap>
                 {user?.email}
               </Typography>
             </Box>
@@ -219,7 +233,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       {/* AppBar */}
       <AppBar
-        position="fixed"
+        position='fixed'
         sx={{
           width: {
             md: sidebarOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
@@ -235,8 +249,8 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
       >
         <Toolbar>
           <IconButton
-            color="inherit"
-            edge="start"
+            color='inherit'
+            edge='start'
             onClick={handleDrawerToggle}
             sx={{ mr: 2 }}
           >
@@ -272,7 +286,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               <Search />
             </Box>
             <InputBase
-              placeholder="Search…"
+              placeholder='Search…'
               sx={{
                 color: 'inherit',
                 width: '100%',
@@ -288,7 +302,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
           {/* Right Icons */}
           <IconButton
-            color="inherit"
+            color='inherit'
             onClick={toggleTheme}
             sx={{ mr: 1 }}
             title={`Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`}
@@ -296,13 +310,13 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             {mode === 'dark' ? <LightMode /> : <DarkMode />}
           </IconButton>
 
-          <IconButton color="inherit" sx={{ mr: 1 }}>
-            <Badge badgeContent={3} color="error">
+          <IconButton color='inherit' sx={{ mr: 1 }}>
+            <Badge badgeContent={3} color='error'>
               <Notifications />
             </Badge>
           </IconButton>
 
-          <IconButton color="inherit" onClick={handleProfileMenuOpen}>
+          <IconButton color='inherit' onClick={handleProfileMenuOpen}>
             <Avatar
               sx={{
                 width: 32,
@@ -318,7 +332,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
       {/* Drawer */}
       <Box
-        component="nav"
+        component='nav'
         sx={{
           width: { md: sidebarOpen ? DRAWER_WIDTH : 0 },
           flexShrink: { md: 0 },
@@ -326,7 +340,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
       >
         {/* Mobile drawer */}
         <Drawer
-          variant="temporary"
+          variant='temporary'
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{ keepMounted: true }}
@@ -343,7 +357,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
         {/* Desktop drawer */}
         <Drawer
-          variant="permanent"
+          variant='permanent'
           sx={{
             display: { xs: 'none', md: 'block' },
             '& .MuiDrawer-paper': {
@@ -364,7 +378,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
       {/* Main Content */}
       <Box
-        component="main"
+        component='main'
         sx={{
           flexGrow: 1,
           p: 3,
@@ -390,17 +404,17 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         <Box sx={{ px: 2, py: 1 }}>
-          <Typography variant="subtitle2">{user?.fullName}</Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant='subtitle2'>{user?.fullName}</Typography>
+          <Typography variant='caption' color='text.secondary'>
             {user?.email}
           </Typography>
         </Box>
         <Divider />
-        
+
         {/* My Profile */}
         <MenuItem onClick={() => handleNavigate('/profile')}>
           <ListItemIcon>
-            <Person fontSize="small" />
+            <Person fontSize='small' />
           </ListItemIcon>
           My Profile
         </MenuItem>
@@ -409,22 +423,31 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         {isTenantAdmin && (
           <MenuItem onClick={() => handleNavigate('/admin/users')}>
             <ListItemIcon>
-              <AdminPanelSettings fontSize="small" />
+              <AdminPanelSettings fontSize='small' />
             </ListItemIcon>
             User Management
           </MenuItem>
         )}
 
+        {isTenantAdmin && (
+          <MenuItem onClick={() => handleNavigate('/admin/departments')}>
+            <ListItemIcon>
+              <AdminPanelSettings fontSize='small' />
+            </ListItemIcon>
+            Department Management
+          </MenuItem>
+        )}
+
         <MenuItem onClick={handleProfileMenuClose}>
           <ListItemIcon>
-            <Settings fontSize="small" />
+            <Settings fontSize='small' />
           </ListItemIcon>
           Settings
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
-            <Logout fontSize="small" />
+            <Logout fontSize='small' />
           </ListItemIcon>
           Logout
         </MenuItem>

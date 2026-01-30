@@ -10,7 +10,9 @@ import {
   CircularProgress,
   Grid,
   Divider,
+  Chip,
 } from '@mui/material';
+import { Business as BusinessIcon } from '@mui/icons-material';
 import { usersApi } from '@/api/users';
 import type { User } from '@/api/users';
 import ProfileForm from '@/components/user/ProfileForm';
@@ -124,7 +126,9 @@ export default function UserProfile() {
                   <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <ProfilePictureUpload
                       currentImageUrl={user.profileImageUrl}
-                      userName={user.fullName}
+                      userName={
+                        user.fullName || `${user.firstName} ${user.lastName}`
+                      }
                       onUploadSuccess={handleProfilePictureUpload}
                     />
                   </Box>
@@ -136,6 +140,66 @@ export default function UserProfile() {
                     user={user}
                     onUpdate={(updatedUser) => setUser(updatedUser)}
                   />
+
+                  <Divider sx={{ my: 3 }} />
+
+                  {/* Department & Roles Section */}
+                  <Box sx={{ mt: 3 }}>
+                    <Typography variant='h6' gutterBottom>
+                      Organization Details
+                    </Typography>
+
+                    {/* Department */}
+                    <Box sx={{ mb: 2 }}>
+                      <Typography
+                        variant='body2'
+                        color='text.secondary'
+                        gutterBottom
+                      >
+                        <strong>Department:</strong>
+                      </Typography>
+                      {user.departmentName ? (
+                        <Chip
+                          label={user.departmentName}
+                          icon={<BusinessIcon />}
+                          color='primary'
+                          variant='outlined'
+                        />
+                      ) : (
+                        <Typography variant='body2' color='text.secondary'>
+                          Not assigned to a department
+                        </Typography>
+                      )}
+                    </Box>
+
+                    {/* Roles */}
+                    <Box>
+                      <Typography
+                        variant='body2'
+                        color='text.secondary'
+                        gutterBottom
+                      >
+                        <strong>Roles:</strong>
+                      </Typography>
+                      {user.roles && user.roles.length > 0 ? (
+                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                          {user.roles.map((role) => (
+                            <Chip
+                              key={role}
+                              label={role}
+                              size='small'
+                              color='secondary'
+                              variant='outlined'
+                            />
+                          ))}
+                        </Box>
+                      ) : (
+                        <Typography variant='body2' color='text.secondary'>
+                          No roles assigned
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
                 </Grid>
               </Grid>
             </TabPanel>
@@ -175,7 +239,9 @@ export default function UserProfile() {
                 </Typography>
                 <Typography variant='body2' color='text.secondary'>
                   <strong>Account Created:</strong>{' '}
-                  {new Date(user.createdDate).toLocaleDateString()}
+                  {new Date(
+                    user.createdDate || user.createdAt,
+                  ).toLocaleDateString()}
                 </Typography>
                 {user.lastLoginDate && (
                   <Typography variant='body2' color='text.secondary'>

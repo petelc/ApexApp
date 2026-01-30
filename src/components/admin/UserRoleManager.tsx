@@ -10,7 +10,7 @@ import {
   CircularProgress,
   Typography,
 } from '@mui/material';
-import { usersApi } from '@/api/users';
+import { userApi } from '@/api/users';
 
 interface UserRoleManagerProps {
   userId: string;
@@ -43,7 +43,7 @@ export default function UserRoleManager({
     try {
       setLoading(true);
       setError(null);
-      const roles = await usersApi.admin.getAllRoles();
+      const roles = await userApi.admin.getAllRoles();
       setAvailableRoles(roles);
     } catch (err: any) {
       console.error('Error loading roles:', err);
@@ -62,13 +62,13 @@ export default function UserRoleManager({
 
       if (checked) {
         // Assign role
-        await usersApi.admin.assignRole(userId, role);
+        await userApi.admin.assignRole(userId, role);
         const newRoles = [...selectedRoles, role];
         setSelectedRoles(newRoles);
         onRolesChanged(newRoles);
       } else {
         // Remove role
-        await usersApi.admin.removeRole(userId, role);
+        await userApi.admin.removeRole(userId, role);
         const newRoles = selectedRoles.filter((r) => r !== role);
         setSelectedRoles(newRoles);
         onRolesChanged(newRoles);
@@ -94,7 +94,7 @@ export default function UserRoleManager({
 
   if (error && availableRoles.length === 0) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
+      <Alert severity='error' sx={{ mb: 2 }}>
         {error}
       </Alert>
     );
@@ -103,12 +103,12 @@ export default function UserRoleManager({
   return (
     <Box>
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity='error' sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
 
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
         Select the roles to assign to this user:
       </Typography>
 
@@ -139,15 +139,15 @@ export default function UserRoleManager({
       </FormGroup>
 
       <Box sx={{ mt: 2 }}>
-        <Typography variant="subtitle2" gutterBottom>
+        <Typography variant='subtitle2' gutterBottom>
           Currently Assigned Roles:
         </Typography>
-        <Stack direction="row" spacing={1} flexWrap="wrap">
+        <Stack direction='row' spacing={1} flexWrap='wrap'>
           {selectedRoles.map((role) => (
-            <Chip key={role} label={role} color="primary" size="small" />
+            <Chip key={role} label={role} color='primary' size='small' />
           ))}
           {selectedRoles.length === 0 && (
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant='body2' color='text.secondary'>
               No roles assigned
             </Typography>
           )}

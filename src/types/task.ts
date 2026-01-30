@@ -7,46 +7,48 @@ export interface Task {
   // Identity
   id: string;
   projectId: string;
-  
+
   // Core Information
   title: string;
   description: string;
   status: TaskStatus;
   priority: TaskPriority;
-  
+
   // ✅ NEW: Notes
   implementationNotes?: string;
   resolutionNotes?: string;
-  
+
   // Assignment
-  assignedToUserId?: string;
   assignedToDepartmentId?: string;
-  
+  assignedToDepartmentName?: string;
+  assignedToUserId?: string;
+  assignedToUserName?: string;
+
   // Time Tracking
   estimatedHours?: number;
   actualHours?: number;
-  
+
   // Dates
   dueDate?: string;
   createdDate: string;
   startedDate?: string;
   completedDate?: string;
   lastModifiedDate?: string;
-  
+
   // Blocking
   blockedReason?: string;
   blockedDate?: string;
-  
+
   // User Tracking
   createdByUserId: string;
-  startedByUserId?: string;     // ✅ NEW
-  completedByUserId?: string;   // ✅ NEW
-  
+  startedByUserId?: string; // ✅ NEW
+  completedByUserId?: string; // ✅ NEW
+
   // User Objects (enriched from backend)
   createdByUser?: UserSummary;
   assignedToUser?: UserSummary;
-  startedByUser?: UserSummary;     // ✅ NEW
-  completedByUser?: UserSummary;   // ✅ NEW
+  startedByUser?: UserSummary; // ✅ NEW
+  completedByUser?: UserSummary; // ✅ NEW
 }
 
 export interface UserSummary {
@@ -57,7 +59,7 @@ export interface UserSummary {
 }
 
 // Task Status
-export type TaskStatus = 
+export type TaskStatus =
   | 'NotStarted'
   | 'InProgress'
   | 'Blocked'
@@ -81,11 +83,7 @@ export const TaskStatusColors: Record<TaskStatus, string> = {
 };
 
 // Task Priority
-export type TaskPriority = 
-  | 'Low'
-  | 'Medium'
-  | 'High'
-  | 'Critical';
+export type TaskPriority = 'Low' | 'Medium' | 'High' | 'Critical';
 
 export const TaskPriorityLabels: Record<TaskPriority, string> = {
   Low: 'Low',

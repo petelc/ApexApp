@@ -37,12 +37,12 @@ import {
 import { AppLayout } from '@/components/layout/AppLayout';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { projectApi } from '@/api/projects';
-import { taskApi } from '@/api/tasks';
+import tasksApi from '@/api/tasks';
 import { getErrorMessage } from '@/api/client';
 import type { Project, Task } from '@/types/project';
 import { format, differenceInDays } from 'date-fns';
 import { UserLookup } from '@/components/user/user-lookup';
-import { userApi } from '@/api/user';
+import { userApi } from '@/api/users';
 import { UserInfo } from '@/types/auth';
 
 export default function ProjectDetailPage() {

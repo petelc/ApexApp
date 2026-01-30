@@ -1,5 +1,5 @@
 import { Autocomplete, TextField, CircularProgress } from '@mui/material';
-import type { UserSummary } from '@/api/user';  // ✅ Import from API file
+import type { UserSummary } from '@/api/users'; // ✅ Import from API file
 
 interface UserAutocompleteProps {
   users: UserSummary[];
@@ -63,7 +63,9 @@ export function UserAutocomplete({
               ...params.InputProps,
               endAdornment: (
                 <>
-                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {loading ? (
+                    <CircularProgress color='inherit' size={20} />
+                  ) : null}
                   {params.InputProps.endAdornment}
                 </>
               ),

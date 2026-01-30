@@ -37,6 +37,7 @@ import CompleteTaskDialog from '../components/task/dialogs/CompleteTaskDialog';
 import BlockTaskDialog from '../components/task/dialogs/BlockTaskDialog';
 import LogTimeDialog from '../components/task/dialogs/LogTimeDialog';
 import ConfirmDialog from '../components/common/ConfirmDialog';
+import { TaskAssignmentActions } from '@/components/task/TaskAssignmentActions';
 
 const TaskDetail: React.FC = () => {
   const { projectId, taskId } = useParams<{
@@ -118,6 +119,10 @@ const TaskDetail: React.FC = () => {
 
     loadAll();
   }, [taskId]);
+
+  const handleTaskUpdate = () => {
+    loadTask(); // Simply reload the task to get updated assignment info
+  };
 
   // Back button
   // const handleBack = () => {
@@ -405,6 +410,7 @@ const TaskDetail: React.FC = () => {
                 onClaim={handleClaim}
                 loading={actionLoading}
               />
+              <TaskAssignmentActions task={task} onUpdate={handleTaskUpdate} />
 
               {/* Metadata */}
               <TaskMetadata task={task} />
