@@ -24,6 +24,8 @@ import NotFoundPage from '@/pages/NotFound';
 import EditProjectRequestPage from './pages/EditProjectRequest';
 import UserManagement from './pages/admin/UserManagement';
 import UserProfile from './pages/UserProfile';
+import TaskDetail from '@/pages/TaskDetail';
+import { Departments } from '@/pages/admin/Departments';
 
 function App() {
   return (
@@ -175,6 +177,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path='/admin/departments' element={<Departments />} />
             {/* 404 */}
             <Route path='*' element={<NotFoundPage />} />
           </Routes>

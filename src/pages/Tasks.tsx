@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -16,36 +16,23 @@ import {
   MenuItem,
   CircularProgress,
   Alert,
-  Divider,
   Avatar,
+  IconButton,
 } from '@mui/material';
-import {
-  Add,
-  PlayArrow,
-  CheckCircle,
-  Block,
-  DetailsRounded,
-} from '@mui/icons-material';
+import { Add, PlayArrow, CheckCircle, Visibility } from '@mui/icons-material';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { StatusBadge } from '@/components/common/StatusBadge';
-import { taskApi } from '@/api/tasks';
 import { getErrorMessage } from '@/api/client';
-import type {
-  Task,
-  CreateTaskRequest,
-  UpdateTaskRequest,
-} from '@/types/project';
-import { SideDrawer } from '@/components/common/SideDrawer';
+import type { Task, CreateTaskRequest, TaskPriority } from '@/types/project';
 
 import { format } from 'date-fns';
+import tasksApi from '@/api/tasks';
 
 export default function TasksPage() {
   const { id: projectId } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
-  // const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
 
   // Create Dialog
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -53,12 +40,6 @@ export default function TasksPage() {
   const [formData, setFormData] = useState<CreateTaskRequest>({
     title: '',
     description: '',
-    priority: 'Medium',
-  });
-  const [taskData, setTaskData] = useState<UpdateTaskRequest>({
-    title: '',
-    description: '',
-    status: 'NotStarted',
     priority: 'Medium',
   });
 
@@ -72,7 +53,7 @@ export default function TasksPage() {
     if (!projectId) return;
     try {
       setLoading(true);
-      const data = await taskApi.getByProject(projectId);
+      const data = await tasksApi.getProjectTasks(projectId);
       setTasks(data);
     } catch (err) {
       setError(getErrorMessage(err));
@@ -81,20 +62,11 @@ export default function TasksPage() {
     }
   };
 
-  const loadTask = async (taskId: string) => {
-    try {
-      const data = await taskApi.getById(taskId);
-      setTaskData(data);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    }
-  };
-
   const handleCreate = async () => {
     if (!projectId) return;
     try {
       setCreateLoading(true);
-      await taskApi.create(projectId, formData);
+      await tasksApi.createTask(projectId, formData);
       setCreateDialogOpen(false);
       setFormData({ title: '', description: '', priority: 'Medium' });
       await loadTasks();
@@ -107,7 +79,7 @@ export default function TasksPage() {
 
   const handleStart = async (taskId: string) => {
     try {
-      await taskApi.start(taskId);
+      await tasksApi.startTask(taskId);
       await loadTasks();
     } catch (err) {
       setError(getErrorMessage(err));
@@ -116,16 +88,16 @@ export default function TasksPage() {
 
   const handleComplete = async (taskId: string) => {
     try {
-      await taskApi.complete(taskId);
+      await tasksApi.completeTask(taskId);
       await loadTasks();
     } catch (err) {
       setError(getErrorMessage(err));
     }
   };
 
-  const handleDetails = (taskId: string) => {
-    setSideDrawerOpen(true);
-    loadTask(taskId);
+  // ✅ Navigate to task detail
+  const handleViewTask = (taskId: string) => {
+    navigate(`/projects/${projectId}/tasks/${taskId}`);
   };
 
   const groupedTasks = {
@@ -192,15 +164,35 @@ export default function TasksPage() {
                 Not Started ({groupedTasks.notStarted.length})
               </Typography>
               {groupedTasks.notStarted.map((task) => (
-                <Card key={task.id} sx={{ mb: 2 }}>
+                <Card 
+                  key={task.id} 
+                  sx={{ 
+                    mb: 2,
+                    cursor: 'pointer',
+                    '&:hover': { boxShadow: 3 }
+                  }}
+                  onClick={() => handleViewTask(task.id)}
+                >
                   <CardContent>
-                    <Typography
-                      variant='subtitle2'
-                      fontWeight={600}
-                      gutterBottom
-                    >
-                      {task.title}
-                    </Typography>
+                    <Box display='flex' justifyContent='space-between' alignItems='start'>
+                      <Typography
+                        variant='subtitle2'
+                        fontWeight={600}
+                        gutterBottom
+                        sx={{ flex: 1 }}
+                      >
+                        {task.title}
+                      </Typography>
+                      <IconButton 
+                        size='small' 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewTask(task.id);
+                        }}
+                      >
+                        <Visibility fontSize='small' />
+                      </IconButton>
+                    </Box>
                     <Typography variant='caption' color='text.secondary'>
                       {task.description}
                     </Typography>
@@ -236,28 +228,22 @@ export default function TasksPage() {
                       sx={{
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center', // Optional: Aligns items vertically in the center
-                        width: '100%', // Optional: Ensures the box takes full width to show spacing effect
-                        border: 'none', // Optional: for visualization
+                        alignItems: 'center',
+                        width: '100%',
                         padding: '10px',
                       }}
                     >
                       <Button
                         size='small'
                         startIcon={<PlayArrow />}
-                        onClick={() => handleStart(task.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStart(task.id);
+                        }}
                         sx={{ mt: 1 }}
                       >
                         Start
                       </Button>
-                      {/* <Button
-                        size="small"
-                        startIcon={<DetailsRounded />}
-                        onClick={() => handleDetails(task.id)}
-                        sx={{ mt: 1, ml: 1 }}
-                      >
-                      Details
-                      </Button> */}
                     </Box>
                   </CardContent>
                 </Card>
@@ -272,15 +258,29 @@ export default function TasksPage() {
                 In Progress ({groupedTasks.inProgress.length})
               </Typography>
               {groupedTasks.inProgress.map((task) => (
-                <Card key={task.id} sx={{ mb: 2 }}>
+                <Card 
+                  key={task.id} 
+                  sx={{ 
+                    mb: 2,
+                    cursor: 'pointer',
+                    '&:hover': { boxShadow: 3 }
+                  }}
+                  onClick={() => handleViewTask(task.id)}
+                >
                   <CardContent>
-                    <Typography
-                      variant='subtitle2'
-                      fontWeight={600}
-                      gutterBottom
-                    >
-                      {task.title}
-                    </Typography>
+                    <Box display='flex' justifyContent='space-between' alignItems='start'>
+                      <Typography
+                        variant='subtitle2'
+                        fontWeight={600}
+                        gutterBottom
+                        sx={{ flex: 1 }}
+                      >
+                        {task.title}
+                      </Typography>
+                      <IconButton size='small'>
+                        <Visibility fontSize='small' />
+                      </IconButton>
+                    </Box>
                     <Typography variant='caption' color='text.secondary'>
                       {task.assignedToUser?.fullName || 'Unassigned'}
                     </Typography>
@@ -292,7 +292,10 @@ export default function TasksPage() {
                     <Button
                       size='small'
                       startIcon={<CheckCircle />}
-                      onClick={() => handleComplete(task.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleComplete(task.id);
+                      }}
                       sx={{ mt: 1 }}
                     >
                       Complete
@@ -310,15 +313,29 @@ export default function TasksPage() {
                 Blocked ({groupedTasks.blocked.length})
               </Typography>
               {groupedTasks.blocked.map((task) => (
-                <Card key={task.id} sx={{ mb: 2 }}>
+                <Card 
+                  key={task.id} 
+                  sx={{ 
+                    mb: 2,
+                    cursor: 'pointer',
+                    '&:hover': { boxShadow: 3 }
+                  }}
+                  onClick={() => handleViewTask(task.id)}
+                >
                   <CardContent>
-                    <Typography
-                      variant='subtitle2'
-                      fontWeight={600}
-                      gutterBottom
-                    >
-                      {task.title}
-                    </Typography>
+                    <Box display='flex' justifyContent='space-between' alignItems='start'>
+                      <Typography
+                        variant='subtitle2'
+                        fontWeight={600}
+                        gutterBottom
+                        sx={{ flex: 1 }}
+                      >
+                        {task.title}
+                      </Typography>
+                      <IconButton size='small'>
+                        <Visibility fontSize='small' />
+                      </IconButton>
+                    </Box>
                     <Alert severity='error' sx={{ mt: 1 }}>
                       <Typography variant='caption'>
                         {task.blockedReason}
@@ -337,15 +354,29 @@ export default function TasksPage() {
                 Completed ({groupedTasks.completed.length})
               </Typography>
               {groupedTasks.completed.map((task) => (
-                <Card key={task.id} sx={{ mb: 2 }}>
+                <Card 
+                  key={task.id} 
+                  sx={{ 
+                    mb: 2,
+                    cursor: 'pointer',
+                    '&:hover': { boxShadow: 3 }
+                  }}
+                  onClick={() => handleViewTask(task.id)}
+                >
                   <CardContent>
-                    <Typography
-                      variant='subtitle2'
-                      fontWeight={600}
-                      gutterBottom
-                    >
-                      {task.title}
-                    </Typography>
+                    <Box display='flex' justifyContent='space-between' alignItems='start'>
+                      <Typography
+                        variant='subtitle2'
+                        fontWeight={600}
+                        gutterBottom
+                        sx={{ flex: 1 }}
+                      >
+                        {task.title}
+                      </Typography>
+                      <IconButton size='small'>
+                        <Visibility fontSize='small' />
+                      </IconButton>
+                    </Box>
                     <Typography variant='caption' color='text.secondary'>
                       {task.actualHours}h total
                     </Typography>
@@ -355,99 +386,6 @@ export default function TasksPage() {
             </Box>
           </Grid>
         </Grid>
-
-        {/* <SideDrawer open={sideDrawerOpen} onClose={() => setSideDrawerOpen(false)}>
-          <Box>
-            <Typography variant="h4" fontWeight={600} gutterBottom>
-              Task Details
-            </Typography>
-            <Divider sx={{ mb: 2, mt: 2 }} />
-            <Typography variant="body1">
-              Detailed information about the task will be displayed here.
-            </Typography>
-            <Grid container spacing={2} sx={{ mt: 2 }}>
-              <Grid size={{ xs: 12 }}>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Task Title
-                </Typography>
-                <TextField
-                  label="Title"
-                  fullWidth
-                  required
-                  value={taskData.title || ''}
-                  onChange={(e) => setTaskData({ ...taskData, title: e.target.value })}
-                  sx={{ mt: 2, mb: 2 }}
-                />
-              </Grid>
-              <Grid size={ { xs: 4 }}>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Priority
-                </Typography>
-                <TextField
-                  label="Priority"
-                  select
-                  fullWidth
-                  value={taskData.priority}
-                  onChange={(e) => setTaskData({ ...taskData, priority: e.target.value })}
-                  sx={{ mt: 2, mb: 2 }}
-                >
-                  <MenuItem value="Low">Low</MenuItem>
-                  <MenuItem value="Medium">Medium</MenuItem>
-                  <MenuItem value="High">High</MenuItem>
-                  <MenuItem value="Urgent">Urgent</MenuItem>
-                </TextField>
-              </Grid>
-              <Grid size={{ xs: 4 }}>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Status
-                </Typography>
-                <TextField
-                  label="Status"
-                  select
-                  fullWidth
-                  required
-                  value={taskData.status}
-                  onChange={(e) => setTaskData({ ...taskData, status: e.target.value })}
-                  sx={{ mt: 2, mb: 2 }}
-                >
-                  <MenuItem value="NotStarted">Not Started</MenuItem>
-                  <MenuItem value="InProgress">In Progress</MenuItem>
-                  <MenuItem value="Blocked">Blocked</MenuItem>
-                  <MenuItem value="Completed">Completed</MenuItem>
-                  <MenuItem value="Cancelled">Cancelled</MenuItem>
-                </TextField>
-              </Grid>
-              <Grid size={{ xs: 4 }}>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Created Date
-                </Typography>
-                <TextField
-                  label="Created Date"
-                  type="date"
-                  fullWidth
-                  value={taskData.createdDate || ''}
-                  onChange={(e) => setTaskData({ ...taskData, createdDate: e.target.value })}
-                  sx={{ mt: 2, mb: 2 }}
-                />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Description
-                </Typography>
-                <TextField
-                  label="Description"
-                  fullWidth
-                  required
-                  multiline
-                  rows={5}
-                  value={taskData.description}
-                  onChange={(e) => setTaskData({ ...taskData, description: e.target.value })}
-                  sx={{ mt: 2, mb: 2 }}
-                />
-              </Grid>
-            </Grid>
-          </Box>
-        </SideDrawer> */}
 
         {/* Create Task Dialog */}
         <Dialog
@@ -486,13 +424,16 @@ export default function TasksPage() {
               fullWidth
               value={formData.priority}
               onChange={(e) =>
-                setFormData({ ...formData, priority: e.target.value })
+                setFormData({
+                  ...formData,
+                  priority: e.target.value as TaskPriority,
+                })
               }
             >
               <MenuItem value='Low'>Low</MenuItem>
               <MenuItem value='Medium'>Medium</MenuItem>
               <MenuItem value='High'>High</MenuItem>
-              <MenuItem value='Urgent'>Urgent</MenuItem>
+              <MenuItem value='Critical'>Critical</MenuItem>
             </TextField>
           </DialogContent>
           <DialogActions>

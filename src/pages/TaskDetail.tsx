@@ -1,568 +1,495 @@
-import { useEffect, useState } from 'react';
+/**
+ * TaskDetail Page
+ * Complete task detail view with all components
+ */
+
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
+  Container,
   Box,
-  Typography,
-  Card,
-  CardContent,
-  Button,
   Grid,
-  Chip,
-  Divider,
-  CircularProgress,
+  Stack,
   Alert,
-  Avatar,
-  IconButton,
-  LinearProgress,
-  Paper,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Menu,
-  MenuItem,
+  CircularProgress,
+  Snackbar,
 } from '@mui/material';
 import {
-  ArrowBack,
-  PlayArrow,
-  CheckCircle,
-  Block,
-  MoreVert,
-  Timer,
-} from '@mui/icons-material';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { StatusBadge } from '@/components/common/StatusBadge';
-import { taskApi } from '@/api/tasks';
-import { getErrorMessage } from '@/api/client';
-import type { Task } from '@/types/project';
-import { format, differenceInDays } from 'date-fns';
+  TaskHeader,
+  TaskDescription,
+  TaskMetadata,
+  TaskTimeTracking,
+  TaskActionButtons,
+  TaskImplementationNotes,
+  TaskResolutionNotes,
+  TaskChecklist,
+  TaskTimeline,
+} from '../components/task';
+import tasksApi from '../api/tasks';
+import { Task } from '../types/task';
+import { ChecklistItem } from '../types/checklist';
+import { TaskActivity } from '../types/timeline';
+import { isTaskEditable } from '../utils/taskUtils';
 
-export default function TaskDetailPage() {
-  const { id, taskId } = useParams<{ id: string; taskId: string }>();
+// Import dialogs (we'll create these next)
+import EditTaskDialog from '../components/task/dialogs/EditTaskDialog';
+import CompleteTaskDialog from '../components/task/dialogs/CompleteTaskDialog';
+import BlockTaskDialog from '../components/task/dialogs/BlockTaskDialog';
+import LogTimeDialog from '../components/task/dialogs/LogTimeDialog';
+import ConfirmDialog from '../components/common/ConfirmDialog';
+import { TaskAssignmentActions } from '@/components/task/TaskAssignmentActions';
+
+const TaskDetail: React.FC = () => {
+  const { projectId, taskId } = useParams<{
+    projectId: string;
+    taskId: string;
+  }>();
   const navigate = useNavigate();
-  
+
+  // State
   const [task, setTask] = useState<Task | null>(null);
+  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
+  const [activities, setActivities] = useState<TaskActivity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
-  
-  // Action Menu
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  
-  // Dialogs
-  const [logTimeOpen, setLogTimeOpen] = useState(false);
-  const [hours, setHours] = useState('');
-  const [blockReasonOpen, setBlockReasonOpen] = useState(false);
-  const [blockReason, setBlockReason] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (taskId) {
-      loadTask();
-    }
-  }, [taskId]);
+  // Dialog states
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [logTimeDialogOpen, setLogTimeDialogOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    action: () => Promise<void>;
+  }>({
+    open: false,
+    title: '',
+    message: '',
+    action: async () => {},
+  });
 
+  // Load task data
   const loadTask = async () => {
     if (!taskId) return;
-    
+
     try {
+      const taskData = await tasksApi.getTask(taskId);
+      setTask(taskData);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load task');
+    }
+  };
+
+  // Load checklist
+  const loadChecklist = async () => {
+    if (!taskId) return;
+
+    try {
+      const items = await tasksApi.getTaskChecklist(taskId);
+      setChecklistItems(items);
+    } catch (err: any) {
+      console.error('Failed to load checklist:', err);
+    }
+  };
+
+  // Load timeline
+  const loadTimeline = async () => {
+    if (!taskId) return;
+
+    try {
+      const timeline = await tasksApi.getTaskTimeline(taskId);
+      setActivities(timeline);
+    } catch (err: any) {
+      console.error('Failed to load timeline:', err);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    const loadAll = async () => {
       setLoading(true);
-      const data = await taskApi.getById(taskId);
-      setTask(data);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
+      await Promise.all([loadTask(), loadChecklist(), loadTimeline()]);
       setLoading(false);
-    }
+    };
+
+    loadAll();
+  }, [taskId]);
+
+  const handleTaskUpdate = () => {
+    loadTask(); // Simply reload the task to get updated assignment info
   };
 
-  const handleActionClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  // Back button
+  // const handleBack = () => {
+  //   navigate(`/projects/${projectId}/tasks`);
+  // };
+
+  // Refresh all data
+  const refreshAll = async () => {
+    await Promise.all([loadTask(), loadChecklist(), loadTimeline()]);
   };
 
-  const handleActionClose = () => {
-    setAnchorEl(null);
-  };
-
+  // Action handlers
   const handleStart = async () => {
-    if (!task) return;
-    
+    if (!taskId) return;
+
     try {
       setActionLoading(true);
-      await taskApi.start(task.id);
-      handleActionClose();
-      await loadTask();
-    } catch (err) {
-      setError(getErrorMessage(err));
+      await tasksApi.startTask(taskId);
+      await refreshAll();
+      setSuccessMessage('Task started successfully');
+    } catch (err: any) {
+      setError(err.message || 'Failed to start task');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleComplete = async () => {
-    if (!task) return;
-    
+  const handleComplete = async (resolutionNotes?: string) => {
+    if (!taskId) return;
+
     try {
       setActionLoading(true);
-      await taskApi.complete(task.id);
-      handleActionClose();
-      await loadTask();
-    } catch (err) {
-      setError(getErrorMessage(err));
+      await tasksApi.completeTask(taskId, { resolutionNotes });
+      await refreshAll();
+      setCompleteDialogOpen(false);
+      setSuccessMessage('Task completed successfully');
+    } catch (err: any) {
+      setError(err.message || 'Failed to complete task');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleLogTime = async () => {
-    if (!task || !hours) return;
-    
-    try {
-      setActionLoading(true);
-      await taskApi.logTime(task.id, parseFloat(hours));
-      setLogTimeOpen(false);
-      setHours('');
-      await loadTask();
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  const handleBlock = async (blockedReason: string) => {
+    if (!taskId) return;
 
-  const handleBlock = async () => {
-    if (!task || !blockReason) return;
-    
     try {
       setActionLoading(true);
-      await taskApi.block(task.id, blockReason);
-      setBlockReasonOpen(false);
-      setBlockReason('');
-      handleActionClose();
-      await loadTask();
-    } catch (err) {
-      setError(getErrorMessage(err));
+      await tasksApi.blockTask(taskId, { blockedReason });
+      await refreshAll();
+      setBlockDialogOpen(false);
+      setSuccessMessage('Task blocked successfully');
+    } catch (err: any) {
+      setError(err.message || 'Failed to block task');
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleUnblock = async () => {
-    if (!task) return;
-    
+    if (!taskId) return;
+
     try {
       setActionLoading(true);
-      await taskApi.unblock(task.id);
-      handleActionClose();
-      await loadTask();
-    } catch (err) {
-      setError(getErrorMessage(err));
+      await tasksApi.unblockTask(taskId);
+      await refreshAll();
+      setSuccessMessage('Task unblocked successfully');
+    } catch (err: any) {
+      setError(err.message || 'Failed to unblock task');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const getDaysUntilDue = () => {
-    if (!task?.dueDate) return null;
-    return differenceInDays(new Date(task.dueDate), new Date());
+  const handleCancel = async () => {
+    if (!taskId) return;
+
+    try {
+      setActionLoading(true);
+      await tasksApi.cancelTask(taskId);
+      await refreshAll();
+      setConfirmDialog({ ...confirmDialog, open: false });
+      setSuccessMessage('Task cancelled successfully');
+    } catch (err: any) {
+      setError(err.message || 'Failed to cancel task');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const getHoursProgress = () => {
-    if (!task?.estimatedHours || task.estimatedHours === 0) return 0;
-    return Math.round(((task.actualHours || 0) / task.estimatedHours) * 100);
+  const handleClaim = async () => {
+    if (!taskId) return;
+
+    try {
+      setActionLoading(true);
+      await tasksApi.claimTask(taskId);
+      await refreshAll();
+      setSuccessMessage('Task claimed successfully');
+    } catch (err: any) {
+      setError(err.message || 'Failed to claim task');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
+  const handleLogTime = async (hours: number) => {
+    if (!taskId) return;
+
+    try {
+      setActionLoading(true);
+      await tasksApi.logTime(taskId, { hours });
+      await refreshAll();
+      setLogTimeDialogOpen(false);
+      setSuccessMessage(
+        `Logged ${hours} hour${hours !== 1 ? 's' : ''} successfully`,
+      );
+    } catch (err: any) {
+      setError(err.message || 'Failed to log time');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEdit = async (updates: any) => {
+    if (!taskId) return;
+
+    try {
+      setActionLoading(true);
+      await tasksApi.updateTask(taskId, updates);
+      await refreshAll();
+      setEditDialogOpen(false);
+      setSuccessMessage('Task updated successfully');
+    } catch (err: any) {
+      setError(err.message || 'Failed to update task');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Notes handlers
+  const handleSaveImplementationNotes = async (notes: string) => {
+    if (!taskId) return;
+    await tasksApi.updateImplementationNotes(taskId, { notes });
+    await loadTask();
+    await loadTimeline();
+  };
+
+  const handleSaveResolutionNotes = async (notes: string) => {
+    if (!taskId) return;
+    await tasksApi.updateResolutionNotes(taskId, { notes });
+    await loadTask();
+    await loadTimeline();
+  };
+
+  // Checklist handlers
+  const handleAddChecklistItem = async (description: string) => {
+    if (!taskId) return;
+    await tasksApi.addChecklistItem(taskId, {
+      description,
+      order: checklistItems.length,
+    });
+  };
+
+  const handleToggleChecklistItem = async (itemId: string) => {
+    if (!taskId) return;
+    await tasksApi.toggleChecklistItem(taskId, itemId);
+  };
+
+  // Show confirm dialog
+  const showConfirmDialog = (
+    title: string,
+    message: string,
+    action: () => Promise<void>,
+  ) => {
+    setConfirmDialog({
+      open: true,
+      title,
+      message,
+      action,
+    });
+  };
+
+  // Loading state
   if (loading) {
     return (
-      <AppLayout>
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+      <Container maxWidth='xl'>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '60vh',
+          }}
+        >
           <CircularProgress />
         </Box>
-      </AppLayout>
+      </Container>
     );
   }
 
+  // Error state
   if (error && !task) {
     return (
-      <AppLayout>
-        <Alert severity="error">{error}</Alert>
-      </AppLayout>
+      <Container maxWidth='xl'>
+        <Box sx={{ py: 4 }}>
+          <Alert severity='error'>{error}</Alert>
+        </Box>
+      </Container>
     );
   }
 
+  // No task
   if (!task) {
     return (
-      <AppLayout>
-        <Alert severity="error">Task not found</Alert>
-      </AppLayout>
+      <Container maxWidth='xl'>
+        <Box sx={{ py: 4 }}>
+          <Alert severity='info'>Task not found</Alert>
+        </Box>
+      </Container>
     );
   }
 
-  const daysUntilDue = getDaysUntilDue();
-  const hoursProgress = getHoursProgress();
-
   return (
-    <>
-      <title>{task.title} - Task - APEX</title>
-      <AppLayout>
+    <Container maxWidth='xl'>
+      <Box sx={{ py: 4 }}>
         {/* Header */}
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={3}>
-          <Box flex={1}>
-            <Box display="flex" alignItems="center" gap={2} mb={1}>
-              <IconButton onClick={() => navigate(`/projects/${task.projectId}/tasks`)}>
-                <ArrowBack />
-              </IconButton>
-              <Typography variant="h4" fontWeight={700}>
-                {task.title}
-              </Typography>
-            </Box>
-            <Box display="flex" alignItems="center" gap={1} ml={7}>
-              <StatusBadge status={task.status} size="small" />
-              <Chip
-                label={task.priority}
-                size="small"
-                color={
-                  task.priority === 'Urgent'
-                    ? 'error'
-                    : task.priority === 'High'
-                    ? 'warning'
-                    : 'default'
-                }
-              />
-            </Box>
-          </Box>
-          
-          <IconButton onClick={handleActionClick} disabled={actionLoading}>
-            <MoreVert />
-          </IconButton>
-        </Box>
+        <TaskHeader
+          task={task}
+          projectId={projectId || ''}
+          onEdit={() => setEditDialogOpen(true)}
+        />
 
-        {/* Error Alert */}
-        {error && (
-          <Alert severity="error" onClose={() => setError('')} sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
-
-        {/* Time Tracking Overview */}
-        {task.estimatedHours && (
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Grid container spacing={3}>
-                <Grid size={{ xs: 12, md: 4 }}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Time Progress
-                  </Typography>
-                  <Box display="flex" alignItems="baseline" gap={1}>
-                    <Typography variant="h4" fontWeight={700}>
-                      {task.actualHours || 0}h
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      / {task.estimatedHours}h
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={Math.min(hoursProgress, 100)}
-                    sx={{ mt: 1, height: 8, borderRadius: 4 }}
-                    color={hoursProgress > 100 ? 'error' : 'primary'}
-                  />
-                  <Typography variant="caption" color="text.secondary">
-                    {hoursProgress}% of estimated time
-                  </Typography>
-                </Grid>
-
-                {daysUntilDue !== null && (
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Time Until Due
-                    </Typography>
-                    <Typography
-                      variant="h4"
-                      fontWeight={700}
-                      color={daysUntilDue < 0 ? 'error' : daysUntilDue < 3 ? 'warning.main' : 'inherit'}
-                    >
-                      {Math.abs(daysUntilDue)} days
-                    </Typography>
-                    {daysUntilDue < 0 && (
-                      <Typography variant="caption" color="error">
-                        Overdue
-                      </Typography>
-                    )}
-                  </Grid>
-                )}
-
-                <Grid size={{ xs: 12, md: 4 }}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Actions
-                  </Typography>
-                  <Button
-                    startIcon={<Timer />}
-                    size="small"
-                    onClick={() => setLogTimeOpen(true)}
-                    disabled={task.status !== 'InProgress'}
-                  >
-                    Log Time
-                  </Button>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        )}
-
+        {/* Main Content */}
         <Grid container spacing={3}>
-          {/* Main Content */}
-          <Grid size={{ xs: 12, md: 8 }}>
-            {/* Description */}
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
-                  Description
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  {task.description}
-                </Typography>
-              </CardContent>
-            </Card>
+          {/* Left Column */}
+          <Grid size={{ xs: 12, lg: 8 }}>
+            <Stack spacing={3}>
+              {/* Description */}
+              <TaskDescription description={task.description} />
 
-            {/* Blocked Reason */}
-            {task.blockedReason && (
-              <Card sx={{ mb: 3 }}>
-                <CardContent>
-                  <Typography variant="h6" fontWeight={600} gutterBottom>
-                    Blocked
-                  </Typography>
-                  <Paper variant="outlined" sx={{ p: 2, bgcolor: 'error.50' }}>
-                    <Typography variant="body2">{task.blockedReason}</Typography>
-                    {task.blockedDate && (
-                      <Typography variant="caption" color="text.secondary" display="block" mt={1}>
-                        Since {format(new Date(task.blockedDate), 'MMM d, yyyy h:mm a')}
-                      </Typography>
-                    )}
-                  </Paper>
-                </CardContent>
-              </Card>
-            )}
+              {/* Implementation Notes */}
+              <TaskImplementationNotes
+                task={task}
+                onSave={handleSaveImplementationNotes}
+              />
+
+              {/* Resolution Notes */}
+              <TaskResolutionNotes
+                task={task}
+                onSave={handleSaveResolutionNotes}
+              />
+
+              {/* Checklist */}
+              <TaskChecklist
+                taskId={task.id}
+                items={checklistItems}
+                onAddItem={handleAddChecklistItem}
+                onToggleItem={handleToggleChecklistItem}
+                onRefresh={loadChecklist}
+                canEdit={isTaskEditable(task)}
+              />
+
+              {/* Timeline */}
+              <TaskTimeline activities={activities} />
+            </Stack>
           </Grid>
 
-          {/* Sidebar */}
-          <Grid size={{ xs: 12, md: 4 }}>
-            {/* Assigned To */}
-            {task.assignedToUser && (
-              <Card sx={{ mb: 3 }}>
-                <CardContent>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Assigned To
-                  </Typography>
-                  <Box display="flex" alignItems="center" gap={2}>
-                    <Avatar sx={{ width: 48, height: 48 }}>
-                      {task.assignedToUser?.fullName?.[0] || '?'}
-                    </Avatar>
-                    <Box>
-                      <Typography variant="body1" fontWeight={600}>
-                        {task.assignedToUser?.fullName || 'Unknown User'}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {task.assignedToUser?.email}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            )}
+          {/* Right Column */}
+          <Grid size={{ xs: 12, lg: 4 }}>
+            <Stack spacing={3}>
+              {/* Action Buttons */}
+              <TaskActionButtons
+                task={task}
+                onStart={handleStart}
+                onComplete={() => setCompleteDialogOpen(true)}
+                onBlock={() => setBlockDialogOpen(true)}
+                onUnblock={handleUnblock}
+                onCancel={() =>
+                  showConfirmDialog(
+                    'Cancel Task',
+                    'Are you sure you want to cancel this task? This action cannot be undone.',
+                    handleCancel,
+                  )
+                }
+                onClaim={handleClaim}
+                loading={actionLoading}
+              />
+              <TaskAssignmentActions task={task} onUpdate={handleTaskUpdate} />
 
-            {/* Created By */}
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Created By
-                </Typography>
-                <Box display="flex" alignItems="center" gap={2}>
-                  <Avatar sx={{ width: 48, height: 48 }}>
-                    {task.createdByUser?.fullName?.[0] || '?'}
-                  </Avatar>
-                  <Box>
-                    <Typography variant="body1" fontWeight={600}>
-                      {task.createdByUser?.fullName || 'Unknown User'}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {task.createdByUser?.email}
-                    </Typography>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
+              {/* Metadata */}
+              <TaskMetadata task={task} />
 
-            {/* Details */}
-            <Card>
-              <CardContent>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Details
-                </Typography>
-                <Box display="flex" flexDirection="column" gap={2}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Priority
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {task.priority}
-                    </Typography>
-                  </Box>
-
-                  <Divider />
-
-                  {task.dueDate && (
-                    <>
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          Due Date
-                        </Typography>
-                        <Typography variant="body2" fontWeight={600}>
-                          {format(new Date(task.dueDate), 'MMM d, yyyy')}
-                        </Typography>
-                      </Box>
-                      <Divider />
-                    </>
-                  )}
-
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Created
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {format(new Date(task.createdDate), 'MMM d, yyyy h:mm a')}
-                    </Typography>
-                  </Box>
-
-                  {task.startedDate && (
-                    <>
-                      <Divider />
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          Started
-                        </Typography>
-                        <Typography variant="body2" fontWeight={600}>
-                          {format(new Date(task.startedDate), 'MMM d, yyyy h:mm a')}
-                        </Typography>
-                      </Box>
-                    </>
-                  )}
-
-                  {task.completedDate && (
-                    <>
-                      <Divider />
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          Completed
-                        </Typography>
-                        <Typography variant="body2" fontWeight={600}>
-                          {format(new Date(task.completedDate), 'MMM d, yyyy h:mm a')}
-                        </Typography>
-                      </Box>
-                    </>
-                  )}
-                </Box>
-              </CardContent>
-            </Card>
+              {/* Time Tracking */}
+              <TaskTimeTracking
+                task={task}
+                onLogTime={() => setLogTimeDialogOpen(true)}
+              />
+            </Stack>
           </Grid>
         </Grid>
+      </Box>
 
-        {/* Action Menu */}
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleActionClose}
-        >
-          {task.status === 'NotStarted' && (
-            <MenuItem onClick={handleStart}>
-              <PlayArrow fontSize="small" sx={{ mr: 1 }} />
-              Start Task
-            </MenuItem>
-          )}
-          {task.status === 'InProgress' && [
-            <MenuItem key="complete" onClick={handleComplete}>
-              <CheckCircle fontSize="small" sx={{ mr: 1 }} />
-              Complete
-            </MenuItem>,
-            <MenuItem
-              key="block"
-              onClick={() => {
-                handleActionClose();
-                setBlockReasonOpen(true);
-              }}
-            >
-              <Block fontSize="small" sx={{ mr: 1 }} />
-              Block Task
-            </MenuItem>,
-          ]}
-          {task.status === 'Blocked' && (
-            <MenuItem onClick={handleUnblock}>
-              <PlayArrow fontSize="small" sx={{ mr: 1 }} />
-              Unblock
-            </MenuItem>
-          )}
-        </Menu>
+      {/* Dialogs */}
+      {task && (
+        <>
+          <EditTaskDialog
+            open={editDialogOpen}
+            task={task}
+            onClose={() => setEditDialogOpen(false)}
+            onSave={handleEdit}
+            loading={actionLoading}
+          />
 
-        {/* Log Time Dialog */}
-        <Dialog open={logTimeOpen} onClose={() => !actionLoading && setLogTimeOpen(false)}>
-          <DialogTitle>Log Time</DialogTitle>
-          <DialogContent>
-            <TextField
-              label="Hours"
-              type="number"
-              fullWidth
-              value={hours}
-              onChange={(e) => setHours(e.target.value)}
-              sx={{ mt: 2 }}
-              inputProps={{ min: 0.5, step: 0.5 }}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setLogTimeOpen(false)} disabled={actionLoading}>
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleLogTime}
-              disabled={actionLoading || !hours}
-            >
-              {actionLoading ? 'Logging...' : 'Log Time'}
-            </Button>
-          </DialogActions>
-        </Dialog>
+          <CompleteTaskDialog
+            open={completeDialogOpen}
+            onClose={() => setCompleteDialogOpen(false)}
+            onComplete={handleComplete}
+            loading={actionLoading}
+          />
 
-        {/* Block Reason Dialog */}
-        <Dialog
-          open={blockReasonOpen}
-          onClose={() => !actionLoading && setBlockReasonOpen(false)}
-        >
-          <DialogTitle>Block Task</DialogTitle>
-          <DialogContent>
-            <TextField
-              label="Reason"
-              multiline
-              rows={3}
-              fullWidth
-              value={blockReason}
-              onChange={(e) => setBlockReason(e.target.value)}
-              sx={{ mt: 2 }}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setBlockReasonOpen(false)} disabled={actionLoading}>
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={handleBlock}
-              disabled={actionLoading || !blockReason}
-            >
-              {actionLoading ? 'Blocking...' : 'Block Task'}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </AppLayout>
-    </>
+          <BlockTaskDialog
+            open={blockDialogOpen}
+            onClose={() => setBlockDialogOpen(false)}
+            onBlock={handleBlock}
+            loading={actionLoading}
+          />
+
+          <LogTimeDialog
+            open={logTimeDialogOpen}
+            onClose={() => setLogTimeDialogOpen(false)}
+            onLogTime={handleLogTime}
+            loading={actionLoading}
+            currentActualHours={task.actualHours || 0}
+            estimatedHours={task.estimatedHours}
+          />
+
+          <ConfirmDialog
+            open={confirmDialog.open}
+            title={confirmDialog.title}
+            message={confirmDialog.message}
+            onConfirm={confirmDialog.action}
+            onClose={() => setConfirmDialog({ ...confirmDialog, open: false })}
+            loading={actionLoading}
+          />
+        </>
+      )}
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={4000}
+        onClose={() => setSuccessMessage(null)}
+        message={successMessage}
+      />
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+      >
+        <Alert severity='error' onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      </Snackbar>
+    </Container>
   );
-}
+};
+
+export default TaskDetail;

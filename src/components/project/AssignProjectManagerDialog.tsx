@@ -10,7 +10,7 @@ import {
   Box,
 } from '@mui/material';
 import { UserAutocomplete } from '@/components/user/UserAutocomplete';
-import { userApi, type UserSummary } from '@/api/user';
+import { userApi, type UserSummary } from '@/api/users';
 import { projectApi } from '@/api/projects';
 import { getErrorMessage } from '@/api/client';
 
@@ -37,7 +37,7 @@ export function AssignProjectManagerDialog({
 }: AssignProjectManagerDialogProps) {
   const [projectManagers, setProjectManagers] = useState<UserSummary[]>([]);
   const [selectedManagerId, setSelectedManagerId] = useState<string | null>(
-    currentManagerId || null
+    currentManagerId || null,
   );
   const [loading, setLoading] = useState(false);
   const [loadingManagers, setLoadingManagers] = useState(false);
@@ -56,17 +56,19 @@ export function AssignProjectManagerDialog({
     try {
       setLoadingManagers(true);
       setError('');
-      
+
       console.log('🔍 Loading project managers...');
       const managers = await userApi.getProjectManagers();
-      
+
       console.log('✅ Loaded project managers:', managers);
       console.log('📊 Count:', managers.length);
-      
+
       setProjectManagers(managers);
-      
+
       if (managers.length === 0) {
-        setError('No users with "Project Manager" role found. Please assign the role to users first.');
+        setError(
+          'No users with "Project Manager" role found. Please assign the role to users first.',
+        );
       }
     } catch (err) {
       const errorMsg = getErrorMessage(err);
@@ -83,16 +85,16 @@ export function AssignProjectManagerDialog({
     try {
       setLoading(true);
       setError('');
-      
+
       console.log('🚀 Assigning project manager:', {
         projectId,
         managerId: selectedManagerId,
       });
-      
+
       await projectApi.assignProjectManager(projectId, selectedManagerId);
-      
+
       console.log('✅ Project manager assigned successfully');
-      
+
       onSuccess?.();
       onClose();
     } catch (err) {
@@ -111,18 +113,18 @@ export function AssignProjectManagerDialog({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
       <DialogTitle>Assign Project Manager</DialogTitle>
-      
+
       <DialogContent>
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity='error' sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
 
         {loadingManagers ? (
-          <Box display="flex" justifyContent="center" py={4}>
+          <Box display='flex' justifyContent='center' py={4}>
             <CircularProgress />
           </Box>
         ) : (
@@ -132,13 +134,13 @@ export function AssignProjectManagerDialog({
                 users={projectManagers}
                 selectedUserId={selectedManagerId}
                 onSelect={setSelectedManagerId}
-                label="Project Manager"
+                label='Project Manager'
                 required
                 disabled={loading}
               />
             ) : (
               !error && (
-                <Alert severity="info">
+                <Alert severity='info'>
                   No users with "Project Manager" role found.
                   <br />
                   Please assign the role to users first.
@@ -155,8 +157,13 @@ export function AssignProjectManagerDialog({
         </Button>
         <Button
           onClick={handleAssign}
-          variant="contained"
-          disabled={loading || !selectedManagerId || loadingManagers || projectManagers.length === 0}
+          variant='contained'
+          disabled={
+            loading ||
+            !selectedManagerId ||
+            loadingManagers ||
+            projectManagers.length === 0
+          }
         >
           {loading ? <CircularProgress size={24} /> : 'Assign'}
         </Button>

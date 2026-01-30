@@ -73,7 +73,10 @@ export default function UserEditDialog({
       setError(null);
       setSuccess(false);
 
-      const updatedUser = await usersApi.admin.updateUser(user.id, formData);
+      const updatedUser = await usersApi.admin.updateUser(
+        user.userId,
+        formData,
+      );
 
       // Update roles list with current roles
       updatedUser.roles = userRoles;
@@ -223,7 +226,7 @@ export default function UserEditDialog({
             </Typography>
 
             <UserRoleManager
-              userId={user.id}
+              userId={user.userId}
               currentRoles={userRoles}
               onRolesChanged={handleRolesChanged}
               disabled={saving || success}

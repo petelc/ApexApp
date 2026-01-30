@@ -17,6 +17,7 @@ import type { User } from '@/api/users';
 import UserListTable from '@/components/admin/UserListTable';
 import UserEditDialog from '@/components/admin/UserEditDialog';
 import CreateUserDialog from '@/components/admin/CreateUserDialog';
+import { AssignUserToDepartmentDialog } from '@/components/user/AssignUserToDepartmentDialog';
 import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function UserManagement() {
@@ -28,6 +29,8 @@ export default function UserManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [assignDepartmentDialogOpen, setAssignDepartmentDialogOpen] =
+    useState(false);
   const [availableRoles, setAvailableRoles] = useState<string[]>([]);
 
   useEffect(() => {
@@ -44,9 +47,10 @@ export default function UserManagement() {
       setFilteredUsers(
         users.filter(
           (user) =>
-            user.fullName.toLowerCase().includes(term) ||
+            user.fullName?.toLowerCase().includes(term) ||
             user.email.toLowerCase().includes(term) ||
-            user.roles.some((role) => role.toLowerCase().includes(term)),
+            user.departmentName?.toLowerCase().includes(term) ||
+            user.roles?.some((role) => role.toLowerCase().includes(term)),
         ),
       );
     }
@@ -56,7 +60,7 @@ export default function UserManagement() {
     try {
       setLoading(true);
       setError(null);
-      const usersData = await usersApi.admin.getAllUsers();
+      const usersData = await usersApi.getAll();
       setUsers(usersData);
       setFilteredUsers(usersData);
     } catch (err: any) {
@@ -84,7 +88,7 @@ export default function UserManagement() {
   const handleUserUpdated = (updatedUser: User) => {
     // Update user in the list
     setUsers((prev) =>
-      prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)),
+      prev.map((u) => (u.userId === updatedUser.userId ? updatedUser : u)),
     );
     setEditDialogOpen(false);
   };
@@ -93,6 +97,22 @@ export default function UserManagement() {
     // Add new user to the list
     setUsers((prev) => [newUser, ...prev]);
     setCreateDialogOpen(false);
+  };
+
+  const handleAssignDepartment = (user: User) => {
+    setSelectedUser(user);
+    setAssignDepartmentDialogOpen(true);
+  };
+
+  const handleAssignDepartmentSuccess = () => {
+    setAssignDepartmentDialogOpen(false);
+    setSelectedUser(null);
+    loadUsers();
+  };
+
+  const handleAssignDepartmentClose = () => {
+    setAssignDepartmentDialogOpen(false);
+    setSelectedUser(null);
   };
 
   if (loading) {
@@ -142,7 +162,7 @@ export default function UserManagement() {
             <Box sx={{ mb: 3 }}>
               <TextField
                 fullWidth
-                placeholder='Search by name, email, or role...'
+                placeholder='Search by name, email, department, or role...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 InputProps={{
@@ -155,7 +175,11 @@ export default function UserManagement() {
               />
             </Box>
 
-            <UserListTable users={filteredUsers} onEditUser={handleEditUser} />
+            <UserListTable
+              users={filteredUsers}
+              onEditUser={handleEditUser}
+              onAssignDepartment={handleAssignDepartment}
+            />
           </CardContent>
         </Card>
 
@@ -174,6 +198,15 @@ export default function UserManagement() {
           onUserCreated={handleUserCreated}
           availableRoles={availableRoles}
         />
+
+        {selectedUser && (
+          <AssignUserToDepartmentDialog
+            open={assignDepartmentDialogOpen}
+            user={selectedUser}
+            onClose={handleAssignDepartmentClose}
+            onSuccess={handleAssignDepartmentSuccess}
+          />
+        )}
       </Box>
     </AppLayout>
   );
