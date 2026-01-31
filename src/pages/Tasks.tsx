@@ -62,6 +62,8 @@ export default function TasksPage() {
     }
   };
 
+  console.log('TasksPage render, tasks loaded:', tasks);
+
   const handleCreate = async () => {
     if (!projectId) return;
     try {
@@ -164,17 +166,21 @@ export default function TasksPage() {
                 Not Started ({groupedTasks.notStarted.length})
               </Typography>
               {groupedTasks.notStarted.map((task) => (
-                <Card 
-                  key={task.id} 
-                  sx={{ 
+                <Card
+                  key={task.id}
+                  sx={{
                     mb: 2,
                     cursor: 'pointer',
-                    '&:hover': { boxShadow: 3 }
+                    '&:hover': { boxShadow: 3 },
                   }}
                   onClick={() => handleViewTask(task.id)}
                 >
                   <CardContent>
-                    <Box display='flex' justifyContent='space-between' alignItems='start'>
+                    <Box
+                      display='flex'
+                      justifyContent='space-between'
+                      alignItems='start'
+                    >
                       <Typography
                         variant='subtitle2'
                         fontWeight={600}
@@ -183,8 +189,8 @@ export default function TasksPage() {
                       >
                         {task.title}
                       </Typography>
-                      <IconButton 
-                        size='small' 
+                      <IconButton
+                        size='small'
                         onClick={(e) => {
                           e.stopPropagation();
                           handleViewTask(task.id);
@@ -258,17 +264,21 @@ export default function TasksPage() {
                 In Progress ({groupedTasks.inProgress.length})
               </Typography>
               {groupedTasks.inProgress.map((task) => (
-                <Card 
-                  key={task.id} 
-                  sx={{ 
+                <Card
+                  key={task.id}
+                  sx={{
                     mb: 2,
                     cursor: 'pointer',
-                    '&:hover': { boxShadow: 3 }
+                    '&:hover': { boxShadow: 3 },
                   }}
                   onClick={() => handleViewTask(task.id)}
                 >
                   <CardContent>
-                    <Box display='flex' justifyContent='space-between' alignItems='start'>
+                    <Box
+                      display='flex'
+                      justifyContent='space-between'
+                      alignItems='start'
+                    >
                       <Typography
                         variant='subtitle2'
                         fontWeight={600}
@@ -313,17 +323,21 @@ export default function TasksPage() {
                 Blocked ({groupedTasks.blocked.length})
               </Typography>
               {groupedTasks.blocked.map((task) => (
-                <Card 
-                  key={task.id} 
-                  sx={{ 
+                <Card
+                  key={task.id}
+                  sx={{
                     mb: 2,
                     cursor: 'pointer',
-                    '&:hover': { boxShadow: 3 }
+                    '&:hover': { boxShadow: 3 },
                   }}
                   onClick={() => handleViewTask(task.id)}
                 >
                   <CardContent>
-                    <Box display='flex' justifyContent='space-between' alignItems='start'>
+                    <Box
+                      display='flex'
+                      justifyContent='space-between'
+                      alignItems='start'
+                    >
                       <Typography
                         variant='subtitle2'
                         fontWeight={600}
@@ -354,17 +368,21 @@ export default function TasksPage() {
                 Completed ({groupedTasks.completed.length})
               </Typography>
               {groupedTasks.completed.map((task) => (
-                <Card 
-                  key={task.id} 
-                  sx={{ 
+                <Card
+                  key={task.id}
+                  sx={{
                     mb: 2,
                     cursor: 'pointer',
-                    '&:hover': { boxShadow: 3 }
+                    '&:hover': { boxShadow: 3 },
                   }}
                   onClick={() => handleViewTask(task.id)}
                 >
                   <CardContent>
-                    <Box display='flex' justifyContent='space-between' alignItems='start'>
+                    <Box
+                      display='flex'
+                      justifyContent='space-between'
+                      alignItems='start'
+                    >
                       <Typography
                         variant='subtitle2'
                         fontWeight={600}

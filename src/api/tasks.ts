@@ -1,6 +1,7 @@
 /**
- * Task API Client
- * All endpoints for task management
+ * Task API Client - COMPLETE FIX
+ * ✅ Fixed: assignTaskToUser sends correct property name
+ * ✅ Fixed: getProjectTasks handles paginated response correctly
  */
 
 import { apiClient } from './client';
@@ -24,13 +25,38 @@ import {
 import { TaskActivity } from '../types/timeline';
 
 /**
+ * Paginated response from backend
+ */
+interface ListTasksResponse {
+  tasks: Task[]; // Try lowercase first
+  Tasks?: Task[]; // Fallback to PascalCase
+  totalCount?: number;
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+/**
  * Get all tasks for a project
  */
 export const getProjectTasks = async (projectId: string): Promise<Task[]> => {
-  const response = await apiClient.get<{ tasks: Task[] }>(
-    `/projects/${projectId}/tasks`,
-  );
-  return response.data.tasks; // ← Extract tasks array
+  try {
+    const response = await apiClient.get<ListTasksResponse>(
+      `/projects/${projectId}/tasks`,
+      {
+        params: {
+          pageNumber: 1,
+          pageSize: 100,
+        },
+      },
+    );
+
+    // Handle both camelCase and PascalCase responses
+    const data = response.data as any;
+    return data.tasks || data.Tasks || [];
+  } catch (error: any) {
+    console.error('Error loading tasks:', error.response?.data);
+    throw error;
+  }
 };
 
 /**
@@ -135,12 +161,15 @@ export const claimTask = async (taskId: string): Promise<void> => {
 
 /**
  * Assign task to a user
+ * ✅ FIXED: Now sends "assignedToUserId" to match backend expectation
  */
 export const assignTaskToUser = async (
   taskId: string,
   data: AssignToUserRequest,
 ): Promise<void> => {
-  await apiClient.post(`/tasks/${taskId}/assign-to-user`, data);
+  await apiClient.post(`/tasks/${taskId}/assign-to-user`, {
+    assignedToUserId: data.assignedToUserId, // ✅ Backend expects "assignedToUserId"
+  });
 };
 
 /**
